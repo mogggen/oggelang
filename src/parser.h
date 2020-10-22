@@ -4,7 +4,7 @@
 #include <vector>
 #include "file_reader.h"
 
-enum TokenType
+enum class TokenType
 {
     ADD,
     SUB,
@@ -20,20 +20,25 @@ enum TokenType
 
     GOTO,
     IFGOTO,
+    VAR,
     MOVE,
     PRINT,
     PRINTC,
 
-    SET,
     IDENTIFIER,
     ARRAY_BEGIN,
     ARRAY_END,
     VALUE,
-    FILE_LOCATION,
+    PROGRAM_LOCATION,
     IFCONDITION,
 };
 
-
+const int EQUAL   = 0;
+const int NEQUAL  = 1;
+const int LEQUAL  = 2;
+const int GEQUAL  = 3;
+const int LESS    = 4;
+const int GREAT   = 5;
 
 struct Token
 {
@@ -43,5 +48,8 @@ struct Token
 };
 
 std::vector<Token> tokenize(FileReader& fr);
+void parse(std::vector<Token> tokens);
+
+void print_token(Token t);
 
 #endif

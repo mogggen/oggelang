@@ -9,6 +9,8 @@ add_executable( ogge
     src/main.cpp
     src/parser.cpp
     src/file_reader.cpp
+    src/compiler.cpp
+    src/interpreter.cpp
 )
 
 set_property(TARGET ogge PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")

@@ -1,24 +1,44 @@
 #ifndef OPCODES_H
 #define OPCODES_H
 
-enum OpCodes
+enum class OpCode
 {
-    GOTO,
     ADD,
     SUB,
     MULT,
     DIV,
-    LSHIFT,
-    RSHIFT,
     AND,
     OR,
     XOR,
-    NOT,
     CMP,
     MOVE,
+
+    ADDC,
+    SUBC,
+    MULTC,
+    DIVC,
+    ANDC,
+    ORC,
+    XORC,
+    CMPC,
+    MOVEC,
+
+    NOT,
+    LSHIFT,
+    RSHIFT,
+
+    GOTO,
     IFGOTO,
+
     PRINT,
     PRINTC,
+};
+
+struct ByteCode
+{
+    int size;
+    int code_size;
+    int* data;
 };
 
 #endif

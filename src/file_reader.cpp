@@ -53,7 +53,10 @@ char read_char(FileReader& fr)
         {
             int read_bytes = fread(fr.other_buffer, sizeof(char), BUFFER_SIZE, fr.file);
             if(read_bytes == 0)
+            {
+                fr.buffer[0] = 0;
                 fr.is_finished = true;
+            }
             fr.other_end = fr.other_buffer + read_bytes;
         }
 
@@ -65,7 +68,6 @@ char read_char(FileReader& fr)
         fr.other_end = fr.other_buffer; // empty other buffer
 
         fr.current = fr.buffer;
-        
     }
 
     return ret;
