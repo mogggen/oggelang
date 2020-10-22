@@ -1,0 +1,7 @@
+set MSG "Hello there!"
+set ARR |12452 3 6 9 7|
+
+add 1 3
+
+cmp VAR_A VAR_B 
+if LEQUAL other_file.ogge:1

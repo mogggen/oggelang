@@ -1,0 +1,7 @@
+set VAR_A 3
+set VAR_B 4
+add VAR_A VAR_B
+
+print VAR_A
+printc 
+

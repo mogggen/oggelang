@@ -1,0 +1,7 @@
+bin
+build
+.vs
+.clangd
+linux_build
+out
+compile_commands.json
