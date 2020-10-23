@@ -1,5 +1,46 @@
-var VAR_A 0
-add VAR_A 1
+var SPACE 32
+var VAR_A 42
+var VAR_B 0
+var VAR_C 0
+var LIST_H 0
+
 print VAR_A
-cmp VAR_A 10 
-if LESS :2
+printc SPACE
+
+ref VAR_B VAR_A
+print VAR_B
+printc SPACE
+
+derf VAR_C VAR_B
+print VAR_C
+printc SPACE
+
+alloc LIST_H
+
+movr LIST_H 13
+var D 0
+derf D LIST_H
+print D
+printc SPACE
+
+var P 0
+var INC 0
+var NEW 0
+move P LIST_H
+add INC 1
+add P 1
+alloc NEW
+movr NEW INC
+movr P NEW
+move P NEW
+cmp INC 10
+if LESS :30
+
+move P LIST_H
+derf NEW P
+print NEW
+printc SPACE
+add P 1
+derf P P
+cmp P 0
+if GREAT :40

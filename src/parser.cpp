@@ -25,6 +25,10 @@ const char* GOTO_STRING = "goto";
 const char* IFGOTO_STRING = "if";
 const char* VAR_STRING = "var";
 const char* MOVE_STRING = "move";
+const char* MOVER_STRING = "movr";
+const char* REF_STRING = "ref";
+const char* DERF_STRING = "derf";
+const char* ALLOC_STRING = "alloc";
 const char* PRINT_STRING = "print";
 const char* PRINTC_STRING = "printc";
 
@@ -59,6 +63,10 @@ void print_token(Token t)
         case TokenType::GOTO:          printf("%s\n", GOTO_STRING);                   break;
         case TokenType::IFGOTO:        printf("%s\n", IFGOTO_STRING);                 break;
         case TokenType::MOVE:          printf("%s\n", MOVE_STRING);                   break;
+        case TokenType::MOVER:         printf("%s\n", MOVER_STRING);                  break;
+        case TokenType::REF:           printf("%s\n", REF_STRING);                    break;
+        case TokenType::DERF:          printf("%s\n", DERF_STRING);                   break;
+        case TokenType::ALLOC:         printf("%s\n", ALLOC_STRING);                  break;
         case TokenType::PRINT:         printf("%s\n", PRINT_STRING);                  break;
         case TokenType::PRINTC:        printf("%s\n", PRINTC_STRING);                 break;
         case TokenType::VAR:           printf("%s\n", VAR_STRING);                    break;
@@ -130,6 +138,14 @@ std::vector<Token> tokenize(FileReader& fr)
                 tokens.push_back(Token{TokenType::IFGOTO,0,fr.loc});
             else if (strcmp(buff, MOVE_STRING) == 0)
                 tokens.push_back(Token{TokenType::MOVE,0,fr.loc});
+            else if (strcmp(buff, MOVER_STRING) == 0)
+                tokens.push_back(Token{TokenType::MOVER,0,fr.loc});
+            else if (strcmp(buff, REF_STRING) == 0)
+                tokens.push_back(Token{TokenType::REF,0,fr.loc});
+            else if (strcmp(buff, DERF_STRING) == 0)
+                tokens.push_back(Token{TokenType::DERF,0,fr.loc});
+            else if (strcmp(buff, ALLOC_STRING) == 0)
+                tokens.push_back(Token{TokenType::ALLOC,0,fr.loc});
             else if (strcmp(buff, PRINT_STRING) == 0)
                 tokens.push_back(Token{TokenType::PRINT,0,fr.loc});
             else if (strcmp(buff, PRINTC_STRING) == 0)

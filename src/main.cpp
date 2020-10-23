@@ -24,8 +24,7 @@ int main(int argc, char** argv)
 
     for(int i=0; i<code.size; i++)
         printf("%d\n", code.data[i]);
-
-    printf("_______\n");
+    printf("-----------------\n");
 
     run(code);
     

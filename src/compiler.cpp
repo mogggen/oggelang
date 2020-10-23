@@ -76,6 +76,9 @@ ByteCode compile(std::vector<Token> tokens)
             case TokenType::XOR:
             case TokenType::CMP:
             case TokenType::MOVE:
+            case TokenType::MOVER:
+            case TokenType::REF:
+            case TokenType::DERF:
             case TokenType::IFGOTO: 
                 n_instruction_bytes += 3; break;
 
@@ -83,6 +86,7 @@ ByteCode compile(std::vector<Token> tokens)
             case TokenType::LSHIFT:
             case TokenType::RSHIFT:
             case TokenType::GOTO: 
+            case TokenType::ALLOC:
             case TokenType::PRINT:
             case TokenType::PRINTC:
                 n_instruction_bytes += 2; break;
@@ -176,6 +180,61 @@ ByteCode compile(std::vector<Token> tokens)
                     compile_inst_with_constant(program_data + instr_addr, OpCode::MOVE, OpCode::MOVEC, arg1, arg2, var_table);
                     instr_addr += 3;
                 } break;
+            case TokenType::MOVER:
+                {
+                    Token arg1 = *(it++);
+                    Token arg2 = *(it++);
+                    if(arg1.type == TokenType::IDENTIFIER)
+                        program_data[instr_addr+1] = get_variable(var_table, arg1.data, arg1.loc);
+                    else
+                        report_error("Argument must be a variable.", arg1.loc);
+
+                    if(arg2.type == TokenType::IDENTIFIER)
+                    {
+                        program_data[instr_addr+2] = get_variable(var_table, arg2.data, arg2.loc);
+                        program_data[instr_addr] = (int)OpCode::MOVER;
+                    }
+                    else if(arg2.type == TokenType::VALUE)
+                    {
+                        program_data[instr_addr+2] = arg2.value;
+                        program_data[instr_addr] = (int)OpCode::MOVERC;
+                    }
+                    else
+                        report_error("Argument must be variable.", arg2.loc);
+                    instr_addr += 3;
+                } break;
+            case TokenType::REF:
+                {
+                    Token arg1 = *(it++);
+                    Token arg2 = *(it++);
+                    program_data[instr_addr] = (int)OpCode::REF;
+                    if(arg1.type == TokenType::IDENTIFIER)
+                        program_data[instr_addr+1] = get_variable(var_table, arg1.data, arg1.loc);
+                    else
+                        report_error("Argument must be a variable.", arg1.loc);
+
+                    if(arg2.type == TokenType::IDENTIFIER)
+                        program_data[instr_addr+2] = get_variable(var_table, arg2.data, arg2.loc);
+                    else
+                        report_error("Argument must be variable.", arg2.loc);
+                    instr_addr += 3;
+                } break;
+            case TokenType::DERF:
+                {
+                    Token arg1 = *(it++);
+                    Token arg2 = *(it++);
+                    program_data[instr_addr] = (int)OpCode::DERF;
+                    if(arg1.type == TokenType::IDENTIFIER)
+                        program_data[instr_addr+1] = get_variable(var_table, arg1.data, arg1.loc);
+                    else
+                        report_error("Argument must be a variable.", arg1.loc);
+
+                    if(arg2.type == TokenType::IDENTIFIER)
+                        program_data[instr_addr+2] = get_variable(var_table, arg2.data, arg2.loc);
+                    else
+                        report_error("Argument must be variable.", arg2.loc);
+                    instr_addr += 3;
+                } break;
             case TokenType::IFGOTO: 
                 {
                     Token arg1 = *(it++);
@@ -245,6 +304,19 @@ ByteCode compile(std::vector<Token> tokens)
                     if(arg.type == TokenType::PROGRAM_LOCATION)
                     {
                         link_locations.push_back({instr_addr+1, arg});
+                    }
+                    else
+                        report_error("'goto' needs a goto location.", arg.loc);
+
+                    instr_addr += 2;
+                } break;
+            case TokenType::ALLOC: 
+                {
+                    Token arg = *(it++);
+                    program_data[instr_addr] = (int)OpCode::ALLOC;
+                    if(arg.type == TokenType::IDENTIFIER)
+                    {
+                        program_data[instr_addr+1] = get_variable(var_table, arg.data, arg.loc);
                     }
                     else
                         report_error("'goto' needs a goto location.", arg.loc);

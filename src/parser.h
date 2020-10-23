@@ -22,6 +22,10 @@ enum class TokenType
     IFGOTO,
     VAR,
     MOVE,
+    MOVER,
+    REF,
+    DERF,
+    ALLOC,
     PRINT,
     PRINTC,
 

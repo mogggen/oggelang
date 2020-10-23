@@ -23,6 +23,13 @@ enum class OpCode
     CMPC,
     MOVEC,
 
+    MOVER,
+    MOVERC,
+
+    REF,
+    DERF,
+
+    ALLOC,
     NOT,
     LSHIFT,
     RSHIFT,
