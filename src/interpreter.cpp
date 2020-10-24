@@ -202,7 +202,7 @@ void run(ByteCode code)
 
             case OpCode::GOTO:
                 {
-                    pc = mem[mem[pc+1]];
+                    pc = mem[pc+1];
                 } break;
 
             case OpCode::IFGOTO:
@@ -237,6 +237,4 @@ void run(ByteCode code)
                 } break;
         }
     }
-
-
 }

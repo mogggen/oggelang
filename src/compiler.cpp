@@ -101,6 +101,7 @@ ByteCode compile(std::vector<Token> tokens)
 
     int data_size = n_instruction_bytes+n_variables;
     int* program_data = (int*)malloc(sizeof(int)*data_size);
+    int* line_num = (int*)malloc(sizeof(int)*data_size);
 
     std::unordered_map<unsigned long, int> var_table;
     std::unordered_map<int, int> location_map; // maps line number to instruction address
@@ -115,6 +116,7 @@ ByteCode compile(std::vector<Token> tokens)
     {
         Token t = *(it++);
         location_map.insert({t.loc.line, instr_addr});
+        line_num[instr_addr] = t.loc.line;
         switch(t.type)
         {
             case TokenType::ADD: 
@@ -391,5 +393,5 @@ ByteCode compile(std::vector<Token> tokens)
             report_error("Couldn't find instruction at program position.", line.loc);
     }
 
-    return ByteCode{data_size, n_instruction_bytes, program_data};
+    return ByteCode{data_size, n_instruction_bytes, program_data, line_num};
 }
