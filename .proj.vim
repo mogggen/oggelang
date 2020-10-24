@@ -42,3 +42,16 @@ let g:ctrlp_custom_ignore = {
   \ 'file': '\v\.(exe|so|dll)$',
   \ 'link': 'some_bad_symbolic_links',
   \ }
+
+
+function FixFilePathInQF()
+    let list = getqflist()
+    for e in list
+        let name = bufname(e.bufnr)[0:2] 
+        if name ==? "..\\"
+            echo e.bufnr ' ' bufname(e.bufnr)
+        endif
+    endfor
+endfunction
+
+

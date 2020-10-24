@@ -1,20 +1,7 @@
 #include "compiler.h"
 #include <unordered_map>
+#include "error.h"
 
-void report_error(const char* err, FileLocation loc)
-{
-    printf("ERROR: %s Line %d Column %d\n", err, loc.line, loc.column);
-}
-
-unsigned long hash_djb2(const char*str)
-{
-    unsigned long hash = 5381;
-    int c;
-    while ((c = *str++))
-        hash = hash*33 + c;
-
-    return hash;
-}
 
 int get_variable(std::unordered_map<unsigned long, int>& var_table, char* name, FileLocation loc)
 {

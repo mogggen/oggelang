@@ -8,6 +8,15 @@ enum AstType
     OPERATION,
 };
 
+enum ExpressionType
+{
+    ADD,
+    SUB,
+    MULT,
+    DIV,
+
+};
+
 struct AstNode
 {
     AstType type;

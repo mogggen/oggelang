@@ -10,27 +10,6 @@ const char* GEQUAL_STRING  = "GEQUAL";
 const char* LESS_STRING    = "LESS";
 const char* GREAT_STRING   = "GREAT";
 
-const char* ADD_STRING = "add";
-const char* SUB_STRING = "sub";
-const char* MULT_STRING = "mult";
-const char* DIV_STRING = "div";
-const char* LSHIFT_STRING = "lsh";
-const char* RSHIFT_STRING = "rsh";
-const char* AND_STRING = "and";
-const char* OR_STRING = "or";
-const char* XOR_STRING = "xor";
-const char* NOT_STRING = "not";
-const char* CMP_STRING = "cmp";
-const char* GOTO_STRING = "goto";
-const char* IFGOTO_STRING = "if";
-const char* VAR_STRING = "var";
-const char* MOVE_STRING = "move";
-const char* MOVER_STRING = "movr";
-const char* REF_STRING = "ref";
-const char* DERF_STRING = "derf";
-const char* ALLOC_STRING = "alloc";
-const char* PRINT_STRING = "print";
-const char* PRINTC_STRING = "printc";
 
 void print_if_condition(int c)
 {
