@@ -103,32 +103,33 @@ void print_statement(AstStatement* stmt, int indent)
     {
         case StatementType::GOTO: 
             {
-                GotoStatement* s = (GotoStatement*)stmt;
-                printf("GOTO %s : %d\n", s->filename, s->line_number);
+                printf("GOTO %s : %d\n", stmt->goto_filename, stmt->goto_line_number);
             } break;
         case StatementType::IF: 
             {
-                IfStatement* s = (IfStatement*)stmt;
                 printf("IF\n");
-                print_expression(s->condition, indent+2);
-                print_statement(s->true_statement, indent+2);
+                print_expression(stmt->expression, indent+2);
+                print_statement(stmt->true_statement, indent+2);
             } break;
         case StatementType::DECLARE: 
             {
-                printf("DECLARE \n");
+                printf("DECLARE %s\n", stmt->var_name);
+                print_expression(stmt->expression, indent+2);
             } break;
         case StatementType::PRINT: 
             {
-                printf("PRINT\n");
-            } break;
-        case StatementType::PRINTC: 
-            {
-                printf("PRINTC\n");
+                if(stmt->print_as_char)
+                    printf("PRINT as char\n");
+                else
+                    printf("PRINT as int\n");
+                print_expression(stmt->expression, indent+2);
             } break;
         case StatementType::ASSIGN: 
             {
-                printf("ASSIGN\n");
-                print_expression(((AssignStatement*)stmt)->expression, indent+2);
+                printf("ASSIGN %s\n", stmt->var_name);
+                print_expression(stmt->expression, indent+2);
             } break;
     }
+
+    print_statement(stmt->next);
 }

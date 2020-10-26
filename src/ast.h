@@ -1,6 +1,8 @@
 #ifndef AST_H
 #define AST_H
 
+#include "file_location.h"
+
 enum class ExpressionType
 {
     ADD,
@@ -27,6 +29,7 @@ enum class ExpressionType
 struct AstExpression
 {
     ExpressionType type;
+    FileLocation loc;
     union
     {
         struct
@@ -45,7 +48,6 @@ enum class StatementType
     IF,
     DECLARE,
     PRINT,
-    PRINTC,
     ASSIGN,
 };
 
@@ -53,42 +55,26 @@ struct AstStatement
 {
     StatementType type;
     AstStatement* next; 
+    FileLocation loc;
+    union
+    {
+        struct // used by GOTO
+        {
+            const char* goto_filename;
+            int goto_line_number;
+        };
+        struct
+        {
+            AstExpression* expression; // useb by DECLARE, ASSIGN, IF and PRINT
+            union
+            {
+                const char* var_name;           // used by DECLARE and ASSIGN
+                AstStatement*  true_statement;  // used by IF
+                bool print_as_char;             // used by PRINT
+            };
+        };
+    };
 };
-
-struct GotoStatement
-{
-    AstStatement head;
-    const char* filename;
-    int line_number;
-};
-
-struct IfStatement
-{
-    AstStatement head;
-    AstExpression* condition;
-    AstStatement*  true_statement;
-};
-
-struct DeclarationStatement
-{
-    AstStatement head;
-    const char* var_name;
-};
-
-struct PrintStatement
-{
-    AstStatement* head;  
-    AstExpression* expression;
-    bool print_as_char;
-};
-
-struct AssignStatement
-{
-    AstStatement head;
-    const char* var_name;
-    AstExpression* expression;
-};
-
 
 void print_statement(AstStatement* stmt, int indent = 0);
 void print_expression(AstExpression* expr, int indent = 0);

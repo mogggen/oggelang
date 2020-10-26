@@ -205,7 +205,7 @@ Token fetch_token(LexerContext& ctx)
 
     Token t = ctx.current_token;
     ctx.current_token = new_token;
-    print_token(t);
+    //print_token(t);
     return t;
 }
 

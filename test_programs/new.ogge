@@ -1,1 +1,10 @@
-VAR_A = 43
+var VAR_A = 42
+goto :56
+var VAR_B
+VAR_B = 23
+goto other_file.ogge:10
+print VAR_B
+printc 10
+if 1 VAR_B = 44
+
+

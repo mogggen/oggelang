@@ -3,6 +3,7 @@
 #include "block_alloc.h"
 #include "lexer.h"
 #include "parser.h"
+#include "compiler.h"
 #include "error.h"
 
 int main(int argc, char** argv)
@@ -14,10 +15,7 @@ int main(int argc, char** argv)
         return 0;
     }
 
-    printf("Tokens: \n");
-
-    //while(peek_token(lexer).type != TokenType::NO_TOKEN)
-        //fetch_token(lexer);
+    //printf("Tokens: \n");
 
     BlockAlloc alloc = create_block_alloc(1024);
 
@@ -27,9 +25,11 @@ int main(int argc, char** argv)
         printf("Compilation failed with %d errors.", num_error);
     else
     {
-        printf("\nAST:\n");
+        printf("AST:\n");
         print_statement(root);
     }
+
+    compile(root);
 
     dealloc(alloc);
 

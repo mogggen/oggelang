@@ -4,6 +4,6 @@
 #include "parser.h"
 #include "opcodes.h"
 
-ByteCode compile(std::vector<Token> tokens);
+void compile(AstStatement* root);
 
 #endif

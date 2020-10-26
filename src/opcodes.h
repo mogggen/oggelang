@@ -3,6 +3,10 @@
 
 enum class OpCode
 {
+    PUSHC,
+    PUSHV,
+    POP,
+
     ADD,
     SUB,
     MULT,
@@ -11,32 +15,18 @@ enum class OpCode
     OR,
     XOR,
     CMP,
-    MOVE,
-
-    ADDC,
-    SUBC,
-    MULTC,
-    DIVC,
-    ANDC,
-    ORC,
-    XORC,
-    CMPC,
-    MOVEC,
-
-    MOVER,
-    MOVERC,
-
-    REF,
-    DERF,
-
-    ALLOC,
     NOT,
     LSHIFT,
     RSHIFT,
+    
+    REF,
+    DERF,
+    MOVE,
+    MOVED,
+    ALLOC,
 
     GOTO,
-    IFGOTO,
-
+    IF,
     PRINT,
     PRINTC,
 };
