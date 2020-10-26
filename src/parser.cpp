@@ -1,224 +1,142 @@
 #include "parser.h"
-#include <stdio.h>
-#include <string.h>
+
+#include "error.h"
 
 
-const char* EQUAL_STRING   = "EQUAL";
-const char* NEQUAL_STRING  = "NEQUAL";
-const char* LEQUAL_STRING  = "LEQUAL";
-const char* GEQUAL_STRING  = "GEQUAL";
-const char* LESS_STRING    = "LESS";
-const char* GREAT_STRING   = "GREAT";
-
-
-void print_if_condition(int c)
+AstExpression* parse_expression(LexerContext& lexer, BlockAlloc& alloc)
 {
-    switch(c)
-    {
-        case EQUAL:  printf("EQUAL\n");  break;
-        case NEQUAL: printf("NEQUAL\n"); break;
-        case LEQUAL: printf("LEQUAL\n"); break;
-        case GEQUAL: printf("GEQUAL\n"); break;
-        case LESS:   printf("LESS\n");   break;
-        case GREAT:  printf("GREAT\n");  break;
-    }
-}
-
-void print_token(Token t)
-{
+    Token t = fetch_non_white_space(lexer);
+    AstExpression* expr = nullptr; 
     switch(t.type)
     {
-        case TokenType::ADD:           printf("%s\n", ADD_STRING);                    break;
-        case TokenType::SUB:           printf("%s\n", SUB_STRING);                    break;
-        case TokenType::MULT:          printf("%s\n", MULT_STRING);                   break;
-        case TokenType::DIV:           printf("%s\n", DIV_STRING);                    break;
-        case TokenType::LSHIFT:        printf("%s\n", LSHIFT_STRING);                 break;
-        case TokenType::RSHIFT:        printf("%s\n", RSHIFT_STRING);                 break;
-        case TokenType::AND:           printf("%s\n", AND_STRING);                    break;
-        case TokenType::OR:            printf("%s\n", OR_STRING);                     break;
-        case TokenType::XOR:           printf("%s\n", XOR_STRING);                    break;
-        case TokenType::NOT:           printf("%s\n", NOT_STRING);                    break;
-        case TokenType::CMP:           printf("%s\n", CMP_STRING);                    break;
-        case TokenType::GOTO:          printf("%s\n", GOTO_STRING);                   break;
-        case TokenType::IFGOTO:        printf("%s\n", IFGOTO_STRING);                 break;
-        case TokenType::MOVE:          printf("%s\n", MOVE_STRING);                   break;
-        case TokenType::MOVER:         printf("%s\n", MOVER_STRING);                  break;
-        case TokenType::REF:           printf("%s\n", REF_STRING);                    break;
-        case TokenType::DERF:          printf("%s\n", DERF_STRING);                   break;
-        case TokenType::ALLOC:         printf("%s\n", ALLOC_STRING);                  break;
-        case TokenType::PRINT:         printf("%s\n", PRINT_STRING);                  break;
-        case TokenType::PRINTC:        printf("%s\n", PRINTC_STRING);                 break;
-        case TokenType::VAR:           printf("%s\n", VAR_STRING);                    break;
-        case TokenType::IDENTIFIER:    printf("IDENTIFIER %s\n", t.data);             break;
-        case TokenType::ARRAY_BEGIN:   printf("ARRAY_BEGIN\n");                       break;
-        case TokenType::ARRAY_END:     printf("ARRAY_END\n");                         break;
-        case TokenType::VALUE:         printf("VALUE %d\n", t.value);                 break;
-        case TokenType::PROGRAM_LOCATION: printf("PROPERTY\n");                       break;
-        case TokenType::IFCONDITION:   {printf("IFCONDITION "); print_if_condition(t.value);}break;
-    }
-}
-
-int find(const char* str, char c)
-{
-    int i=0;
-    while(str[i] != '\0') 
-    {
-        if(str[i] == c)
-            return i;
-        i++;
+        case TokenType::IDENTIFIER:
+            {
+                expr = (AstExpression*)allocate(alloc, sizeof(AstExpression));
+                expr->type = ExpressionType::VARIABLE;
+                expr->var_name = t.data;
+            } break;
+        case TokenType::CONSTANT:
+            {
+                expr = (AstExpression*)allocate(alloc, sizeof(AstExpression));
+                expr->type = ExpressionType::CONSTANT;
+                expr->value = t.value;
+            } break;
+        case TokenType::ALLOC:
+            {
+                expr = (AstExpression*)allocate(alloc, sizeof(AstExpression));
+                expr->type = ExpressionType::ALLOC;
+            } break;
+        default:
+            { 
+                report_error("Expected an expression.", t.loc);
+                return nullptr;
+            } break;
     }
 
-    return -1;
+    return expr;
 }
 
-std::vector<Token> tokenize(FileReader& fr)
+AstStatement* parse(LexerContext& lexer, BlockAlloc& alloc)
 {
-    enum State { NORMAL, ARRAY, CHAR_ARRAY };
-    
-    std::vector<Token> tokens;
+    AstStatement* root = nullptr;
+    AstStatement* current;
 
-    char buff[64];
-    State lexing_state = NORMAL;
-    int v;
-
-    while(!fr.is_finished)
+    while(peek_token(lexer).type != TokenType::NO_TOKEN)
     {
-        FileLocation loc = fr.loc;
-        if(lexing_state == NORMAL)
+        AstStatement* new_statement = nullptr;
+        Token token = fetch_token(lexer);
+        switch(token.type) 
         {
-            peek_word(fr, buff, 64);
-            if      (strcmp(buff, VAR_STRING) == 0)
-                tokens.push_back(Token{TokenType::VAR,0,fr.loc});
-            else if (strcmp(buff, ADD_STRING) == 0)
-                tokens.push_back(Token{TokenType::ADD,0,fr.loc});
-            else if (strcmp(buff, SUB_STRING) == 0)
-                tokens.push_back(Token{TokenType::SUB,0,fr.loc});
-            else if (strcmp(buff, MULT_STRING) == 0)
-                tokens.push_back(Token{TokenType::MULT,0,fr.loc});
-            else if (strcmp(buff, DIV_STRING) == 0)
-                tokens.push_back(Token{TokenType::DIV,0,fr.loc});
-            else if (strcmp(buff, LSHIFT_STRING) == 0)
-                tokens.push_back(Token{TokenType::LSHIFT,0,fr.loc});
-            else if (strcmp(buff, RSHIFT_STRING) == 0)
-                tokens.push_back(Token{TokenType::RSHIFT,0,fr.loc});
-            else if (strcmp(buff, AND_STRING) == 0)
-                tokens.push_back(Token{TokenType::AND, 0,fr.loc});
-            else if (strcmp(buff, OR_STRING) == 0)
-                tokens.push_back(Token{TokenType::OR,0,fr.loc});
-            else if (strcmp(buff, XOR_STRING) == 0)
-                tokens.push_back(Token{TokenType::XOR,0,fr.loc});
-            else if (strcmp(buff, NOT_STRING) == 0)
-                tokens.push_back(Token{TokenType::NOT,0,fr.loc});
-            else if (strcmp(buff, CMP_STRING) == 0)
-                tokens.push_back(Token{TokenType::CMP,0,fr.loc});
-            else if (strcmp(buff, GOTO_STRING) == 0)
-                tokens.push_back(Token{TokenType::GOTO,0,fr.loc});
-            else if (strcmp(buff, IFGOTO_STRING) == 0)
-                tokens.push_back(Token{TokenType::IFGOTO,0,fr.loc});
-            else if (strcmp(buff, MOVE_STRING) == 0)
-                tokens.push_back(Token{TokenType::MOVE,0,fr.loc});
-            else if (strcmp(buff, MOVER_STRING) == 0)
-                tokens.push_back(Token{TokenType::MOVER,0,fr.loc});
-            else if (strcmp(buff, REF_STRING) == 0)
-                tokens.push_back(Token{TokenType::REF,0,fr.loc});
-            else if (strcmp(buff, DERF_STRING) == 0)
-                tokens.push_back(Token{TokenType::DERF,0,fr.loc});
-            else if (strcmp(buff, ALLOC_STRING) == 0)
-                tokens.push_back(Token{TokenType::ALLOC,0,fr.loc});
-            else if (strcmp(buff, PRINT_STRING) == 0)
-                tokens.push_back(Token{TokenType::PRINT,0,fr.loc});
-            else if (strcmp(buff, PRINTC_STRING) == 0)
-                tokens.push_back(Token{TokenType::PRINTC,0,fr.loc});
-            
-            else if (strcmp(buff, EQUAL_STRING) == 0)
-                tokens.push_back(Token{TokenType::IFCONDITION, EQUAL, fr.loc});
-            else if (strcmp(buff, NEQUAL_STRING) == 0)
-                tokens.push_back(Token{TokenType::IFCONDITION, NEQUAL, fr.loc});
-            else if (strcmp(buff, LEQUAL_STRING) == 0)
-                tokens.push_back(Token{TokenType::IFCONDITION, LEQUAL, fr.loc});
-            else if (strcmp(buff, GEQUAL_STRING) == 0)
-                tokens.push_back(Token{TokenType::IFCONDITION, GEQUAL, fr.loc});
-            else if (strcmp(buff, LESS_STRING) == 0)
-                tokens.push_back(Token{TokenType::IFCONDITION, LESS, fr.loc});
-            else if (strcmp(buff, GREAT_STRING) == 0)
-                tokens.push_back(Token{TokenType::IFCONDITION, GREAT, fr.loc});
-
-            else if (*fr.current == '|')
-            {
-                tokens.push_back(Token{TokenType::ARRAY_BEGIN, 0, fr.loc});
-                lexing_state = ARRAY;
-                read_char(fr);
-                continue;
-            }
-            else if (*fr.current == '"')
-            {
-                tokens.push_back(Token{TokenType::ARRAY_BEGIN, 0, fr.loc});
-                lexing_state = CHAR_ARRAY;
-                read_char(fr);
-                continue;
-            }
-            else if(read_value(fr, &v))
-            {
-                tokens.push_back(Token{TokenType::VALUE, v, loc});
-            }
-            else if((v = find(buff, ':')) != -1)
-            {
-                int line;
-                if (sscanf(buff+v+1, "%d", &line) > 0)
+            case TokenType::GOTO:
                 {
-                    tokens.push_back(Token{TokenType::PROGRAM_LOCATION, line, fr.loc});
-                }
-                else
-                    printf("this isn't a valid location.\n");
-            }
-            else // Identifier
-            {
-                Token t;
-                t.type = TokenType::IDENTIFIER;
-                t.loc = fr.loc;
-                int size = strlen(buff)+1;
-                t.data = (char*)malloc(size);
-                memcpy(t.data, buff, size);
-                tokens.push_back(t);
-            }
+                    Token t = fetch_non_white_space(lexer);
 
-            read_to_next_word(fr);
+                    const char* filename;
+                    
+                    if(t.type == TokenType::COLON)
+                        filename = lexer.loc.filename;
+                    else if(t.type == TokenType::IDENTIFIER)
+                    {
+                        filename = t.data;
+                        t = fetch_non_white_space(lexer);
+
+                        if(t.type != TokenType::COLON)
+                        {
+                            report_error("Expected a colon after filename.", t.loc);
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        report_error("Expected a file location.", t.loc);
+                        break;
+                    }
+
+                    t = fetch_non_white_space(lexer);
+
+                    if(t.type == TokenType::CONSTANT)
+                    {
+                        GotoStatement* node = (GotoStatement*)allocate(alloc, sizeof(GotoStatement));
+                        node->head.type = StatementType::GOTO;
+                        node->head.next = nullptr;
+                        node->filename = lexer.loc.filename;
+                        node->line_number = t.value;
+                        new_statement = (AstStatement*)node;
+                    }
+                    else
+                    {
+                        report_error("Expected a line number here.", t.loc);
+                        break;
+                    }
+
+                } break;
+            case TokenType::IF:
+            case TokenType::VAR:
+            case TokenType::PRINT:
+            case TokenType::PRINTC:
+            case TokenType::IDENTIFIER:
+                {
+                    Token t = fetch_non_white_space(lexer);
+
+                    if(t.type == TokenType::ASSIGN)
+                    {
+                        AstExpression* expression = parse_expression(lexer, alloc);
+                        if(expression != nullptr)
+                        {
+                            AssignStatement* stmt = (AssignStatement*)allocate(alloc, sizeof(AssignStatement));
+                            stmt->head.type = StatementType::ASSIGN;
+                            stmt->head.next = nullptr;
+                            stmt->var_name = token.data;
+                            stmt->expression = expression;
+                            new_statement = (AstStatement*)stmt;
+                        }
+                        else
+                            break;
+                    }
+                    else
+                    {
+                        report_error("Expected assignment statement.", t.loc);
+                        break;
+                    }
+                } break;
+            default:
+                break;
         }
-        else if (lexing_state == ARRAY)
+    
+
+        if (root == nullptr)
         {
-            FileLocation loc = fr.loc;
-            if(*fr.current == '|')
-            {
-                tokens.push_back(Token{TokenType::ARRAY_END, 0, loc});
-                lexing_state = NORMAL;
-                read_to_next_word(fr);
-            }
-            else if(read_value(fr, &v))
-            {
-                tokens.push_back(Token{TokenType::VALUE, v, loc});
-            }
-            else
-            {
-                printf("Array contained non int value, moron.\n");
-            }
+            root = new_statement;
+            current = new_statement;
         }
-        else // lexing_state == CHAR_ARRAY
+        else
         {
-            if(*fr.current == '"')
-            {
-                tokens.push_back(Token{TokenType::ARRAY_END, 0, fr.loc});
-                lexing_state = NORMAL;
-                read_to_next_word(fr);
-            }
-            else
-            {
-                FileLocation loc = fr.loc;
-                char c = read_char(fr);
-                tokens.push_back(Token{TokenType::VALUE, c, loc});
-            }
+            current->next = new_statement;
+            current = current->next;
         }
 
     }
 
-    return tokens;
+
+    return root;
 }

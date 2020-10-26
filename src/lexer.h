@@ -20,6 +20,7 @@ enum class TokenType
     ARRAY_BEGIN = '[',
     ARRAY_END = ']',
     EQUALS = '=',
+    COLON = ':',
 
     NEW_LINE = '\n',
     WHITE_SPACE,
@@ -35,17 +36,17 @@ enum class TokenType
     PRINTC,
 
     IDENTIFIER,
-    VALUE,
-    PROGRAM_LOCATION,
+    CONSTANT,
 
-    NO_TOKEN
+    NO_TOKEN,
+    INVALID_TOKEN,
 };
 
 struct Token
 {
     TokenType type;
     FileLocation loc;
-    char* data;
+    union { int value; char* data; };
 };
 
 struct LexerContext
@@ -57,7 +58,12 @@ struct LexerContext
 
 bool create_lexer(LexerContext* ctx, const char* filename);
 Token fetch_token(LexerContext& ctx);
-Token peek_token(LexerContext& ctx);
+const Token& peek_token(LexerContext& ctx);
 void release_lexer(LexerContext& ctx);
+
+Token fetch_non_white_space(LexerContext& lexer);
+void goto_next_newline(LexerContext& lexer);
+
+void print_token(Token t);
 
 #endif

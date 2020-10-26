@@ -1,5 +1,9 @@
 #include "lexer.h"
 
+#include <stdlib.h>
+#include <string.h>
+#include "error.h"
+
 #define  GOTO_STRING "goto"
 #define  IF_STRING "if"
 #define  VAR_STRING "var"
@@ -46,22 +50,47 @@ bool is_token(char c)
         case TokenType::ASSIGN:
         case TokenType::ARRAY_BEGIN:
         case TokenType::ARRAY_END:
+        case TokenType::COLON:
             return true;
         default:
             return false;
     }
 }
 
-bool is_white_space(char c)
+inline bool is_white_space(char c)
 {
     return c == ' ' || c == '\t';
 }
 
+inline bool is_number(char c)
+{
+    return '0' <= c && c <= '9';
+}
+
+int parse_uint(const char* str)
+{
+    int i = 0; 
+    char c;
+    while((c = *str++))
+    {
+        if(is_number(c))
+        {
+            i *= 10;
+            i += c - '0';
+        }
+        else
+        {
+            return -1;
+        }
+    }
+
+    return i;
+}
 
 Token fetch_token(LexerContext& ctx)
 {
     Token new_token;
-    new_token.type = TokenType::NO_TOKEN;
+    new_token.type = TokenType::INVALID_TOKEN;
     new_token.loc = ctx.loc;
 
     char buf[128];
@@ -79,7 +108,7 @@ Token fetch_token(LexerContext& ctx)
         }
         if( is_token(c) )
         {
-            if( buf_size == 0 )
+            if( buf_size == 0 && !first_is_white_space )
             {
                 new_token.type = (TokenType)c;
                 ctx.loc.column++;
@@ -89,6 +118,7 @@ Token fetch_token(LexerContext& ctx)
             {
                 ungetc(c, ctx.file);
                 buf[buf_size] = '\0';
+                break;
             }
         }
         else if( is_white_space(c) )
@@ -97,12 +127,12 @@ Token fetch_token(LexerContext& ctx)
             {
                 first_is_white_space = true;
                 ctx.loc.column++;
-                break;
             }
             else
             {
                 ungetc(c, ctx.file);
                 buf[buf_size] = '\0';
+                break;
             }
         }
         else if( c == '\n' )
@@ -118,6 +148,7 @@ Token fetch_token(LexerContext& ctx)
             {
                 ungetc(c, ctx.file);
                 buf[buf_size] = '\0';
+                break;
             }
         }
         else
@@ -125,7 +156,6 @@ Token fetch_token(LexerContext& ctx)
             if(first_is_white_space)
             {
                 ungetc(c, ctx.file);
-                new_token.type = TokenType::WHITE_SPACE;
                 break;
             }
             else
@@ -149,20 +179,83 @@ Token fetch_token(LexerContext& ctx)
             case hash_djb2(PRINTC_STRING):  new_token.type = TokenType::PRINTC; break;
             default:
             {
-                 
+                if( is_number(buf[0]) )         
+                {
+                    new_token.type = TokenType::CONSTANT;
+                    int v = parse_uint(buf);
+                    if(v >= 0)
+                        new_token.value = v;
+                    else
+                        report_error("Interger constant may not contain letters.", new_token.loc);
+                }
+                else
+                {
+                    new_token.type = TokenType::IDENTIFIER;
+                    int len = strlen(buf);
+                    new_token.data = (char*)malloc(len+1);
+                    memcpy(new_token.data, buf, len+1);
+                }
             } break;
         }
     }
+    else if( first_is_white_space )
+    {
+        new_token.type = TokenType::WHITE_SPACE;
+    }
 
-    return Token{TokenType::NO_TOKEN};
+    Token t = ctx.current_token;
+    ctx.current_token = new_token;
+    print_token(t);
+    return t;
 }
 
-Token peek_token(LexerContext& ctx)
+const Token& peek_token(LexerContext& ctx)
 {
-    return Token{TokenType::NO_TOKEN};
+    return ctx.current_token;
+}
+
+Token fetch_non_white_space(LexerContext& lexer)
+{
+    Token t = fetch_token(lexer);
+    if(t.type == TokenType::WHITE_SPACE)
+        t = fetch_token(lexer);
+
+    return t;
+}
+
+void goto_next_newline(LexerContext& lexer)
+{
+    Token t;
+    do
+    {
+        t = fetch_token(lexer);
+    }
+    while(t.type != TokenType::NEW_LINE && t.type != TokenType::NO_TOKEN);
 }
 
 void release_lexer(LexerContext& ctx)
 {
     fclose(ctx.file);
+}
+
+void print_token(Token t)
+{
+    switch(t.type)
+    {
+        case TokenType::NEW_LINE: printf("NEW_LINE\n"); break;
+        case TokenType::WHITE_SPACE: printf("WHITE_SPACE\n"); break;
+        case TokenType::LSHIFT: printf("LSHIFT\n"); break;
+        case TokenType::RSHIFT: printf("RSHIFT\n"); break;
+        case TokenType::GOTO: printf("GOTO\n"); break;
+        case TokenType::IF: printf("IF\n"); break;
+        case TokenType::VAR: printf("VAR\n"); break;
+        case TokenType::ALLOC: printf("ALLOC\n"); break;
+        case TokenType::PRINT: printf("PRINT\n"); break;
+        case TokenType::PRINTC: printf("PRINTC\n"); break;
+        case TokenType::IDENTIFIER: printf("IDENTIFIER: %s\n", t.data); break;
+        case TokenType::CONSTANT: printf("CONSTANT: %d\n", t.value); break;
+        case TokenType::NO_TOKEN: printf("NO_TOKEN\n"); break;
+        case TokenType::INVALID_TOKEN: printf("INVALID_TOKEN\n"); break;
+        default: printf("'%c'\n", (char)t.type); break;
+    }
 }

@@ -6,6 +6,7 @@ nnoremap <f4> :10sp<cr>:terminal bin\ogge.exe<cr>
 nnoremap <f2> :wa<cr>:!cmake -S . -B build\ -G "Ninja" -DCMAKE_BUILD_TYPE=Debug<cr>
 
 nnoremap <f8> :!explorer .<cr><cr>
+nnoremap <f7> :!devenv .<cr><cr>
 
 nnoremap <leader>g :call ToggleHeader()<cr>
 
