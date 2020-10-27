@@ -173,7 +173,7 @@ int compile_statement(CompileCtx& cc, AstStatement* stmt)
     return cc.program_data.size() - prev_size;
 }
 
-void compile(AstStatement* root)
+ByteCode compile(AstStatement* root)
 {
     CompileCtx cc; 
 
@@ -226,4 +226,15 @@ void compile(AstStatement* root)
     printf("\nstatic data:\n");
     for(int i : cc.static_data)
         printf("%d\n", i);
+
+    
+    
+
+    int* data = (int*)malloc(cc.program_data.size() + cc.static_data.size());
+    memcpy(data, cc.program_data.data(), sizeof(int)*cc.program_data.size());
+    memcpy(data+cc.program_data.size(), cc.static_data.data(), sizeof(int)*cc.static_data.size());
+
+    return ByteCode{(int)cc.program_data.size()+(int)cc.static_data.size(),
+                    (int)cc.program_data.size(),
+                    data};
 }

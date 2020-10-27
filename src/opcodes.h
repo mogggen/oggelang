@@ -36,7 +36,6 @@ struct ByteCode
     int size;
     int code_size;
     int* data;
-    int* line_numbers;
 };
 
 #endif

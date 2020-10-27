@@ -4,6 +4,6 @@
 #include "parser.h"
 #include "opcodes.h"
 
-void compile(AstStatement* root);
+ByteCode compile(AstStatement* root);
 
 #endif

@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "block_alloc.h"
 #include "lexer.h"
@@ -29,10 +30,15 @@ int main(int argc, char** argv)
         print_statement(root);
     }
 
-    compile(root);
+    ByteCode code = compile(root);
 
     dealloc(alloc);
 
+    printf("\nbyte code:\n");
+    for(int i = 0; i < code.size; i++)
+        printf("%d\n", code.data[i]);
+
+    free(code.data);
     
     return 0;
 }
