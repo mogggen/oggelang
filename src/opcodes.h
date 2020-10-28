@@ -31,6 +31,16 @@ enum class OpCode
     PRINTC,
 };
 
+enum class CmpTypes
+{
+    EQUAL,
+    NOT_EQUAL,
+    LESS_EQUAL,
+    GREATER_EQUAL,
+    LESS,
+    GREATER,
+};
+
 struct ByteCode
 {
     int size;

@@ -14,6 +14,7 @@ add_executable( ogge
     ${src_dir}/lexer.cpp
     ${src_dir}/parser.cpp
     ${src_dir}/compiler.cpp
+    ${src_dir}/interpreter.cpp
 )
 
 set_property(TARGET ogge PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")

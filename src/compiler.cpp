@@ -16,7 +16,6 @@ constexpr unsigned long hash_djb2(const char *str)
 
 struct CompileCtx
 {
-    struct AddrLinenum{unsigned long long addr; int line_num;};
     std::vector<int> program_data;
     std::vector<AddrLinenum> program_line_num;
     std::vector<int> static_data;
@@ -198,6 +197,7 @@ ByteCode compile(AstStatement* root)
     for(auto a : cc.var_addr)
         cc.program_data[a] += cc.program_data.size();
 
+    // print compile result
     printf("\nprogram data:\n");
     int j = 0;
     for(int i = 0; i < cc.program_data.size() ; i++)
@@ -226,15 +226,15 @@ ByteCode compile(AstStatement* root)
     printf("\nstatic data:\n");
     for(int i : cc.static_data)
         printf("%d\n", i);
-
-    
     
 
-    int* data = (int*)malloc(cc.program_data.size() + cc.static_data.size());
-    memcpy(data, cc.program_data.data(), sizeof(int)*cc.program_data.size());
-    memcpy(data+cc.program_data.size(), cc.static_data.data(), sizeof(int)*cc.static_data.size());
+    int size = cc.program_data.size() + cc.static_data.size();
+    int* data = new int[size];
+    for(int i=0; i<cc.program_data.size(); i++)
+        data[i] = cc.program_data[i];
+    
+    for(int i=0; i<cc.static_data.size(); i++)
+        data[i + cc.program_data.size()] = cc.static_data[i];
 
-    return ByteCode{(int)cc.program_data.size()+(int)cc.static_data.size(),
-                    (int)cc.program_data.size(),
-                    data};
+    return ByteCode{size, (int)cc.program_data.size(), data};
 }

@@ -5,6 +5,7 @@
 #include "lexer.h"
 #include "parser.h"
 #include "compiler.h"
+#include "interpreter.h"
 #include "error.h"
 
 int main(int argc, char** argv)
@@ -38,7 +39,9 @@ int main(int argc, char** argv)
     for(int i = 0; i < code.size; i++)
         printf("%d\n", code.data[i]);
 
-    free(code.data);
+    run(code);
+
+    delete code.data;
     
     return 0;
 }
