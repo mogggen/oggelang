@@ -11,6 +11,42 @@ void print_expression(AstExpression* expr, int indent)
 
     switch(expr->type)
     {
+        case ExpressionType::EQUAL:
+            {
+                printf("EQUAL\n");
+                print_expression(expr->param_a, indent+2);
+                print_expression(expr->param_b, indent+2);
+            } break;
+        case ExpressionType::NEQUAL:
+            {
+                printf("NEQUAL\n");
+                print_expression(expr->param_a, indent+2);
+                print_expression(expr->param_b, indent+2);
+            } break;
+        case ExpressionType::LEQUAL:
+            {
+                printf("LEQUAL\n");
+                print_expression(expr->param_a, indent+2);
+                print_expression(expr->param_b, indent+2);
+            } break;
+        case ExpressionType::GEQUAL:
+            {
+                printf("GEQUAL\n");
+                print_expression(expr->param_a, indent+2);
+                print_expression(expr->param_b, indent+2);
+            } break;
+        case ExpressionType::LESS:
+            {
+                printf("LESS\n");
+                print_expression(expr->param_a, indent+2);
+                print_expression(expr->param_b, indent+2);
+            } break;
+        case ExpressionType::GREATER:
+            {
+                printf("GREATER\n");
+                print_expression(expr->param_a, indent+2);
+                print_expression(expr->param_b, indent+2);
+            } break;
         case ExpressionType::ADD:
             {
                 printf("ADD\n");

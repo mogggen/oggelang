@@ -4,11 +4,35 @@
 
 AstExpression* parse_expression(LexerContext& lexer, BlockAlloc& alloc);
 
+AstExpression* balance_expression(AstExpression* expr)
+{
+    if( expr->type != ExpressionType::ALLOC && 
+        expr->type != ExpressionType::CONSTANT && 
+        expr->type != ExpressionType::VARIABLE &&
+        expr->type != ExpressionType::REF &&
+        expr->type != ExpressionType::DERF)
+    {
+        AstExpression* right_expr = expr->param_b;
+
+        if( expr->type > right_expr->type )
+        {
+            expr->param_b = right_expr->param_a;
+            right_expr->param_a = expr;
+            expr = right_expr;
+
+            expr->param_a = balance_expression(expr->param_a);
+        }
+    }
+
+    return expr;
+}
+
 AstExpression* parse_operator_expression(LexerContext& lexer, BlockAlloc& alloc, AstExpression* left_expr)
 {
     Token t = peek_token(lexer);
     ExpressionType type;
     bool has_fetched = false;
+
     switch(t.type)
     {
         case TokenType::NEW_LINE: return nullptr;
@@ -25,7 +49,10 @@ AstExpression* parse_operator_expression(LexerContext& lexer, BlockAlloc& alloc,
                 fetch_token(lexer);
                 has_fetched = true;
                 if(peek_token(lexer).type == TokenType::EQUALS)
+                {
+                    fetch_token(lexer);
                     type = ExpressionType::LEQUAL;
+                }
                 else
                     type = ExpressionType::LESS;
             } break;
@@ -34,7 +61,10 @@ AstExpression* parse_operator_expression(LexerContext& lexer, BlockAlloc& alloc,
                 fetch_token(lexer);
                 has_fetched = true;
                 if(peek_token(lexer).type == TokenType::EQUALS)
+                {
+                    fetch_token(lexer);
                     type = ExpressionType::GEQUAL;
+                }
                 else
                     type = ExpressionType::GREATER;
             } break;
@@ -43,7 +73,10 @@ AstExpression* parse_operator_expression(LexerContext& lexer, BlockAlloc& alloc,
                 fetch_token(lexer);
                 has_fetched = true;
                 if(peek_token(lexer).type == TokenType::EQUALS)
+                {
+                    fetch_token(lexer);
                     type = ExpressionType::EQUAL;
+                }
                 else
                 {
                     report_error("Unrecognized operation.", peek_token(lexer).loc);
@@ -55,7 +88,10 @@ AstExpression* parse_operator_expression(LexerContext& lexer, BlockAlloc& alloc,
                 fetch_token(lexer);
                 has_fetched = true;
                 if(peek_token(lexer).type == TokenType::EQUALS)
+                {
+                    fetch_token(lexer);
                     type = ExpressionType::NEQUAL;
+                }
                 else
                 {
                     report_error("Unrecognized operation.", peek_token(lexer).loc);
@@ -82,19 +118,8 @@ AstExpression* parse_operator_expression(LexerContext& lexer, BlockAlloc& alloc,
     oper->param_a = left_expr;
     oper->param_b = right_expr;
 
-    if( right_expr->type != ExpressionType::ALLOC && 
-        right_expr->type != ExpressionType::CONSTANT && 
-        right_expr->type != ExpressionType::VARIABLE &&
-        right_expr->type != ExpressionType::REF &&
-        right_expr->type != ExpressionType::DERF)
-    {
-        if( oper->type > right_expr->type )
-        {
-            oper->param_b = right_expr->param_a;
-            right_expr->param_a = oper;
-            oper = right_expr;
-        }
-    }
+    oper = balance_expression(oper);
+
 
     return oper;
 }
