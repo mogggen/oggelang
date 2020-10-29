@@ -120,9 +120,10 @@ int compile_statement(CompileCtx& cc, AstStatement* stmt)
             } break;
         case StatementType::IF:
             {
+                unsigned long beginning_addr = cc.program_data.size();
                 if(compile_expression(cc, stmt->expression))
                 {
-                    cc.program_line_num.push_back({cc.program_data.size(), stmt->loc.line});
+                    cc.program_line_num.push_back({beginning_addr, stmt->loc.line});
                     cc.program_data.push_back((int)OpCode::IF);
                     int location = cc.program_data.size();
                     cc.program_data.push_back(0);
@@ -144,9 +145,10 @@ int compile_statement(CompileCtx& cc, AstStatement* stmt)
             } break;
         case StatementType::PRINT:
             {
+                unsigned long beginning_addr = cc.program_data.size();
                 if(compile_expression(cc, stmt->expression))
                 {
-                    cc.program_line_num.push_back({cc.program_data.size(), stmt->loc.line});
+                    cc.program_line_num.push_back({beginning_addr, stmt->loc.line});
                     if(stmt->print_as_char)
                         cc.program_data.push_back((int)OpCode::PRINTC);
                     else
@@ -155,13 +157,14 @@ int compile_statement(CompileCtx& cc, AstStatement* stmt)
             } break;
         case StatementType::ASSIGN:
             {
+                unsigned long beginning_addr = cc.program_data.size();
                 if(!compile_expression(cc, stmt->expression))
                     break;
 
                 int addr = get_variable(cc.var_table, stmt->var_name, stmt->loc);
                 if(addr > 0)
                 {
-                    cc.program_line_num.push_back({cc.program_data.size(), stmt->loc.line});
+                    cc.program_line_num.push_back({beginning_addr, stmt->loc.line});
                     cc.program_data.push_back((int)OpCode::MOVED);
                     cc.program_data.push_back(addr);
                     cc.var_addr.push_back(cc.program_data.size()-1);

@@ -43,7 +43,7 @@ void run(ByteCode code)
     std::vector<int> heap;
 
     Stack stack;
-    stack.sp = 0;
+    stack.sp = -1;
     stack.stack = (int*)malloc(sizeof(int)*1024);
 
     while(pc < code.code_size)
@@ -56,7 +56,8 @@ void run(ByteCode code)
                 } break;
             case OpCode::PUSHV:
                 {
-                    push(stack, mem[mem[pc++]]);
+                    int a = mem[pc++];
+                    push(stack, AT(a));
                 } break;
             case OpCode::POP:
                 {
@@ -165,7 +166,7 @@ void run(ByteCode code)
                     if(pop(stack))
                         pc++;
                     else
-                        pc += mem[pc]-1;
+                        pc += mem[pc]+1;
 
                 } break;
             case OpCode::PRINT:

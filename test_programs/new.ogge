@@ -2,7 +2,8 @@ var VAR_A = 42
 goto :3
 var VAR_B
 VAR_B = 23
-goto other_file.ogge:7
 print VAR_B
+goto other_file.ogge:7
 printc 10
-if 1 VAR_B = 44
+if 0 VAR_B = 44
+printc VAR_B
