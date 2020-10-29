@@ -51,6 +51,9 @@ bool is_token(char c)
         case TokenType::ARRAY_BEGIN:
         case TokenType::ARRAY_END:
         case TokenType::COLON:
+        case TokenType::LESS:
+        case TokenType::GREATER:
+        case TokenType::EXCLAMATION:
             return true;
         default:
             return false;
@@ -108,7 +111,7 @@ Token fetch_token(LexerContext& ctx)
         }
         if( is_token(c) )
         {
-            if( buf_size == 0 && !first_is_white_space )
+            if( buf_size == 0 )
             {
                 new_token.type = (TokenType)c;
                 ctx.loc.column++;
@@ -137,7 +140,7 @@ Token fetch_token(LexerContext& ctx)
         }
         else if( c == '\n' )
         {
-            if(buf_size == 0 || first_is_white_space)
+            if(buf_size == 0)
             {
                 new_token.type = TokenType::NEW_LINE;
                 ctx.loc.line++;
@@ -153,16 +156,8 @@ Token fetch_token(LexerContext& ctx)
         }
         else
         {
-            if(first_is_white_space)
-            {
-                ungetc(c, ctx.file);
-                break;
-            }
-            else
-            {
-                buf[buf_size++] = c;
-                ctx.loc.column++;
-            }
+            buf[buf_size++] = c;
+            ctx.loc.column++;
         }
     }
 
@@ -198,29 +193,16 @@ Token fetch_token(LexerContext& ctx)
             } break;
         }
     }
-    else if( first_is_white_space )
-    {
-        new_token.type = TokenType::WHITE_SPACE;
-    }
 
     Token t = ctx.current_token;
     ctx.current_token = new_token;
-    //print_token(t);
+    print_token(t);
     return t;
 }
 
 const Token& peek_token(LexerContext& ctx)
 {
     return ctx.current_token;
-}
-
-Token fetch_non_white_space(LexerContext& lexer)
-{
-    Token t = fetch_token(lexer);
-    if(t.type == TokenType::WHITE_SPACE)
-        t = fetch_token(lexer);
-
-    return t;
 }
 
 void goto_next_newline(LexerContext& lexer)
@@ -243,7 +225,6 @@ void print_token(Token t)
     switch(t.type)
     {
         case TokenType::NEW_LINE: printf("NEW_LINE\n"); break;
-        case TokenType::WHITE_SPACE: printf("WHITE_SPACE\n"); break;
         case TokenType::LSHIFT: printf("LSHIFT\n"); break;
         case TokenType::RSHIFT: printf("RSHIFT\n"); break;
         case TokenType::GOTO: printf("GOTO\n"); break;

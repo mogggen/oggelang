@@ -21,9 +21,11 @@ enum class TokenType
     ARRAY_END = ']',
     EQUALS = '=',
     COLON = ':',
+    LESS = '<',
+    GREATER = '>',
+    EXCLAMATION = '!',
 
     NEW_LINE = '\n',
-    WHITE_SPACE,
     
     LSHIFT,
     RSHIFT,
@@ -61,7 +63,6 @@ Token fetch_token(LexerContext& ctx);
 const Token& peek_token(LexerContext& ctx);
 void release_lexer(LexerContext& ctx);
 
-Token fetch_non_white_space(LexerContext& lexer);
 void goto_next_newline(LexerContext& lexer);
 
 void print_token(Token t);

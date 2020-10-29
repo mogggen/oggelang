@@ -5,6 +5,13 @@
 
 enum class ExpressionType
 {
+    EQUAL,
+    NEQUAL,
+    LEQUAL,
+    GEQUAL,
+    LESS,
+    GREATER,
+
     ADD,
     SUB,
     MULT,

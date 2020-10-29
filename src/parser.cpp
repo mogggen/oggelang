@@ -2,10 +2,106 @@
 
 #include "error.h"
 
+AstExpression* parse_expression(LexerContext& lexer, BlockAlloc& alloc);
+
+AstExpression* parse_operator_expression(LexerContext& lexer, BlockAlloc& alloc, AstExpression* left_expr)
+{
+    Token t = peek_token(lexer);
+    ExpressionType type;
+    bool has_fetched = false;
+    switch(t.type)
+    {
+        case TokenType::NEW_LINE: return nullptr;
+        case TokenType::ADD: type       = ExpressionType::ADD; break;
+        case TokenType::SUB: type       = ExpressionType::SUB; break;
+        case TokenType::MULT: type      = ExpressionType::MULT; break;
+        case TokenType::DIV: type       = ExpressionType::DIV; break;
+        case TokenType::AND: type       = ExpressionType::AND; break;
+        case TokenType::OR: type        = ExpressionType::OR; break;
+        case TokenType::XOR: type       = ExpressionType::XOR; break;
+        case TokenType::NOT: type       = ExpressionType::NOT; break;
+        case TokenType::LESS:
+            {
+                fetch_token(lexer);
+                has_fetched = true;
+                if(peek_token(lexer).type == TokenType::EQUALS)
+                    type = ExpressionType::LEQUAL;
+                else
+                    type = ExpressionType::LESS;
+            } break;
+        case TokenType::GREATER:
+            {
+                fetch_token(lexer);
+                has_fetched = true;
+                if(peek_token(lexer).type == TokenType::EQUALS)
+                    type = ExpressionType::GEQUAL;
+                else
+                    type = ExpressionType::GREATER;
+            } break;
+        case TokenType::EQUALS:
+            {
+                fetch_token(lexer);
+                has_fetched = true;
+                if(peek_token(lexer).type == TokenType::EQUALS)
+                    type = ExpressionType::EQUAL;
+                else
+                {
+                    report_error("Unrecognized operation.", peek_token(lexer).loc);
+                    return nullptr;
+                }
+            } break;
+        case TokenType::EXCLAMATION:
+            {
+                fetch_token(lexer);
+                has_fetched = true;
+                if(peek_token(lexer).type == TokenType::EQUALS)
+                    type = ExpressionType::NEQUAL;
+                else
+                {
+                    report_error("Unrecognized operation.", peek_token(lexer).loc);
+                    return nullptr;
+                }
+            } break;
+        default:
+            {
+                return nullptr;
+            }
+    }
+
+    if(!has_fetched)
+        fetch_token(lexer);
+
+    AstExpression* right_expr = parse_expression(lexer, alloc);
+    if(right_expr == nullptr)
+    {
+        return nullptr;
+    }
+
+    AstExpression* oper = (AstExpression*)allocate(alloc, sizeof(AstExpression)); 
+    oper->type = type;
+    oper->param_a = left_expr;
+    oper->param_b = right_expr;
+
+    if( right_expr->type != ExpressionType::ALLOC && 
+        right_expr->type != ExpressionType::CONSTANT && 
+        right_expr->type != ExpressionType::VARIABLE &&
+        right_expr->type != ExpressionType::REF &&
+        right_expr->type != ExpressionType::DERF)
+    {
+        if( oper->type > right_expr->type )
+        {
+            oper->param_b = right_expr->param_a;
+            right_expr->param_a = oper;
+            oper = right_expr;
+        }
+    }
+
+    return oper;
+}
 
 AstExpression* parse_expression(LexerContext& lexer, BlockAlloc& alloc)
 {
-    Token t = fetch_non_white_space(lexer);
+    Token t = fetch_token(lexer);
     AstExpression* expr = nullptr; 
     switch(t.type)
     {
@@ -26,6 +122,40 @@ AstExpression* parse_expression(LexerContext& lexer, BlockAlloc& alloc)
                 expr = (AstExpression*)allocate(alloc, sizeof(AstExpression));
                 expr->type = ExpressionType::ALLOC;
             } break;
+        case TokenType::REF:
+            {
+                AstExpression* e = parse_expression(lexer, alloc);
+                if(e == nullptr)
+                    return nullptr;
+
+                if(e->type == ExpressionType::VARIABLE)
+                {
+                    expr = (AstExpression*)allocate(alloc, sizeof(AstExpression));
+                    expr->type = ExpressionType::REF;
+                    expr->param_a = e;
+                }
+                else
+                {
+                    report_error("Expected a variable here.", e->loc);
+                }
+            } break;
+        case TokenType::DERF:
+            {
+                AstExpression* e = parse_expression(lexer, alloc);
+                if(e == nullptr)
+                    return nullptr;
+
+                if(e->type == ExpressionType::VARIABLE)
+                {
+                    expr = (AstExpression*)allocate(alloc, sizeof(AstExpression));
+                    expr->type = ExpressionType::DERF;
+                    expr->param_a = e;
+                }
+                else
+                {
+                    report_error("Expected a variable here.", e->loc);
+                }
+            } break;
         default:
             { 
                 report_error("Expected an expression.", t.loc);
@@ -33,7 +163,12 @@ AstExpression* parse_expression(LexerContext& lexer, BlockAlloc& alloc)
             } break;
     }
 
-    return expr;
+    AstExpression* rest = parse_operator_expression(lexer, alloc, expr);
+
+    if(rest != nullptr)
+        return rest;
+    else
+        return expr;
 }
 
 AstStatement* parse_statement(LexerContext& lexer, BlockAlloc& alloc)
@@ -45,7 +180,7 @@ AstStatement* parse_statement(LexerContext& lexer, BlockAlloc& alloc)
     {
         case TokenType::GOTO:
             {
-                Token t = fetch_non_white_space(lexer);
+                Token t = fetch_token(lexer);
 
                 const char* filename;
                 
@@ -54,7 +189,7 @@ AstStatement* parse_statement(LexerContext& lexer, BlockAlloc& alloc)
                 else if(t.type == TokenType::IDENTIFIER)
                 {
                     filename = t.data;
-                    t = fetch_non_white_space(lexer);
+                    t = fetch_token(lexer);
 
                     if(t.type != TokenType::COLON)
                     {
@@ -68,7 +203,7 @@ AstStatement* parse_statement(LexerContext& lexer, BlockAlloc& alloc)
                     break;
                 }
 
-                t = fetch_non_white_space(lexer);
+                t = fetch_token(lexer);
 
                 if(t.type == TokenType::CONSTANT)
                 {
@@ -82,7 +217,7 @@ AstStatement* parse_statement(LexerContext& lexer, BlockAlloc& alloc)
                     report_error("Expected a line number here.", t.loc);
                     break;
                 }
-                t = fetch_non_white_space(lexer);
+                t = fetch_token(lexer);
                 if(t.type != TokenType::NEW_LINE)
                     report_error("Unexpected symbol.", t.loc);
             } break;
@@ -91,8 +226,7 @@ AstStatement* parse_statement(LexerContext& lexer, BlockAlloc& alloc)
                 AstExpression* expression = parse_expression(lexer, alloc);
                 if(expression != nullptr)
                 {
-                    if(peek_token(lexer).type == TokenType::WHITE_SPACE)
-                        fetch_token(lexer);
+                    fetch_token(lexer);
 
                     AstStatement* statement = parse_statement(lexer, alloc);;
                     if(statement != nullptr)
@@ -111,12 +245,12 @@ AstStatement* parse_statement(LexerContext& lexer, BlockAlloc& alloc)
             } break;
         case TokenType::VAR:
             {
-                Token t = fetch_non_white_space(lexer);
+                Token t = fetch_token(lexer);
                 
                 if(t.type == TokenType::IDENTIFIER)
                 {
                     const char* var_name = t.data;
-                    t = fetch_non_white_space(lexer);
+                    t = fetch_token(lexer);
 
                     if(t.type == TokenType::ASSIGN)
                     {
@@ -152,7 +286,7 @@ AstStatement* parse_statement(LexerContext& lexer, BlockAlloc& alloc)
                     report_error("Expected an identifier after 'var'.", t.loc);
                 }
 
-                t = fetch_non_white_space(lexer);
+                t = fetch_token(lexer);
                 if(t.type != TokenType::NEW_LINE)
                     report_error("Unexpected symbol.", t.loc);
             } break;
@@ -168,7 +302,7 @@ AstStatement* parse_statement(LexerContext& lexer, BlockAlloc& alloc)
                 }
                 else
                     break;
-                Token t = fetch_non_white_space(lexer);
+                Token t = fetch_token(lexer);
                 if(t.type != TokenType::NEW_LINE)
                     report_error("Unexpected symbol.", t.loc);
             } break;
@@ -184,13 +318,13 @@ AstStatement* parse_statement(LexerContext& lexer, BlockAlloc& alloc)
                 }
                 else
                     break;
-                Token t = fetch_non_white_space(lexer);
+                Token t = fetch_token(lexer);
                 if(t.type != TokenType::NEW_LINE)
                     report_error("Unexpected symbol.", t.loc);
             } break;
         case TokenType::IDENTIFIER:
             {
-                Token t = fetch_non_white_space(lexer);
+                Token t = fetch_token(lexer);
 
                 if(t.type == TokenType::ASSIGN)
                 {
@@ -211,7 +345,7 @@ AstStatement* parse_statement(LexerContext& lexer, BlockAlloc& alloc)
                     break;
                 }
                 
-                t = fetch_non_white_space(lexer);
+                t = fetch_token(lexer);
                 if(t.type != TokenType::NEW_LINE)
                     report_error("Unexpected symbol.", t.loc);
             } break;
