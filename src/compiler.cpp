@@ -156,6 +156,27 @@ bool compile_expression(CompileCtx& cc, AstExpression* expr)
                 compile_expression(cc, expr->param_a);
                 cc.program_data.push_back((int)OpCode::RSHIFT);
             } break;
+        case ExpressionType::NEGATE:
+            {
+                compile_expression(cc, expr->param_a);
+                cc.program_data.push_back((int)OpCode::PUSHC);
+                cc.program_data.push_back(-1);
+                cc.program_data.push_back((int)OpCode::MULT);
+            } break;
+        case ExpressionType::DECREASE:
+            {
+                compile_expression(cc, expr->param_a);
+                cc.program_data.push_back((int)OpCode::PUSHC);
+                cc.program_data.push_back(1);
+                cc.program_data.push_back((int)OpCode::SUB);
+            } break;
+        case ExpressionType::INCREASE:
+            {
+                compile_expression(cc, expr->param_a);
+                cc.program_data.push_back((int)OpCode::PUSHC);
+                cc.program_data.push_back(1);
+                cc.program_data.push_back((int)OpCode::ADD);
+            } break;
         case ExpressionType::DERF:
             {
                 compile_expression(cc, expr->param_a);

@@ -104,6 +104,21 @@ void print_expression(AstExpression* expr, int indent)
                 printf("RSHIFT\n");
                 print_expression(expr->param_a, indent+2);
             } break;
+        case ExpressionType::NEGATE:
+            {
+                printf("NEGATE\n");
+                print_expression(expr->param_a, indent+2);
+            } break;
+        case ExpressionType::DECREASE:
+            {
+                printf("DECREASE\n");
+                print_expression(expr->param_a, indent+2);
+            } break;
+        case ExpressionType::INCREASE:
+            {
+                printf("INCREASE\n");
+                print_expression(expr->param_a, indent+2);
+            } break;
         case ExpressionType::REF:
             {
                 printf("REF %s\n", expr->var_name);

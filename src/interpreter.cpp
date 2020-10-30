@@ -1,6 +1,8 @@
 #include "interpreter.h"
 
 #include <vector>
+#include <stdio.h>
+#include <stdlib.h>
 
 void report_runtime_errro(const char* msg)
 {

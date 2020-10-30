@@ -9,6 +9,9 @@ bool is_double_arg_expression(AstExpression* e)
     return  e->type != ExpressionType::NOT &&
             e->type != ExpressionType::LSHIFT &&
             e->type != ExpressionType::RSHIFT &&
+            e->type != ExpressionType::NEGATE &&
+            e->type != ExpressionType::DECREASE &&
+            e->type != ExpressionType::INCREASE &&
             e->type != ExpressionType::REF &&
             e->type != ExpressionType::DERF &&
             e->type != ExpressionType::VARIABLE &&
@@ -116,6 +119,77 @@ AstExpression* parse_single_expression(LexerContext& lexer, BlockAlloc& alloc)
                     return nullptr;
                 }
                 
+            } break;
+        case TokenType::ADD:
+            {
+                Token t = peek_token(lexer);
+                if(t.type == TokenType::ADD)
+                {
+                    fetch_token(lexer);
+                    AstExpression* e = parse_single_expression(lexer, alloc);
+                    if(e == nullptr)
+                    {
+                        report_error("Expected expression after '--'.", t.loc);
+                        return nullptr;
+                    }
+                    
+                    if(is_double_arg_expression(e))
+                    {
+                        report_error("Expected a Variable or constant.", e->loc);
+                        return nullptr;
+                    }
+
+                    expr = (AstExpression*)allocate(alloc, sizeof(AstExpression));
+                    expr->type = ExpressionType::INCREASE;
+                    expr->param_a = e;
+                }
+                else
+                {
+                    report_error("Unexpected symbol.", t.loc);
+                }
+            } break;
+        case TokenType::SUB:
+            {
+                Token t = peek_token(lexer);
+                if(t.type == TokenType::SUB)
+                {
+                    fetch_token(lexer);
+                    AstExpression* e = parse_single_expression(lexer, alloc);
+                    if(e == nullptr)
+                    {
+                        report_error("Expected expression after '--'.", t.loc);
+                        return nullptr;
+                    }
+                    
+                    if(is_double_arg_expression(e))
+                    {
+                        report_error("Expected a Variable or constant.", e->loc);
+                        return nullptr;
+                    }
+
+                    expr = (AstExpression*)allocate(alloc, sizeof(AstExpression));
+                    expr->type = ExpressionType::DECREASE;
+                    expr->param_a = e;
+                }
+                else
+                {
+                    AstExpression* e = parse_single_expression(lexer, alloc);
+                    if(e == nullptr)
+                    {
+                        report_error("Expected expression after '-'.", t.loc);
+                        return nullptr;
+                    }
+                    
+                    if(is_double_arg_expression(e))
+                    {
+                        report_error("Expected a Variable or constant.", e->loc);
+                        return nullptr;
+                    }
+
+                    expr = (AstExpression*)allocate(alloc, sizeof(AstExpression));
+                    expr->type = ExpressionType::NEGATE;
+                    expr->param_a = e;
+                }
             } break;
         case TokenType::LESS:
             {

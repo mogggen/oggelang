@@ -24,6 +24,9 @@ enum class ExpressionType
     NOT,
     LSHIFT,
     RSHIFT,
+    NEGATE,
+    DECREASE,
+    INCREASE,
 
     REF,
     DERF,
