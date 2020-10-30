@@ -165,6 +165,12 @@ void print_statement(AstStatement* stmt, int indent)
                 printf("ASSIGN %s\n", stmt->var_name);
                 print_expression(stmt->expression, indent+2);
             } break;
+        case StatementType::DERF_ASSIGN: 
+            {
+                printf("DERF_ASSIGN %s\n", stmt->var_name);
+                print_expression(stmt->addr_expresson, indent+2);
+                print_expression(stmt->expression, indent+2);
+            } break;
     }
 
     print_statement(stmt->next);

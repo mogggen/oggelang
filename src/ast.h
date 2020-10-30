@@ -56,6 +56,7 @@ enum class StatementType
     DECLARE,
     PRINT,
     ASSIGN,
+    DERF_ASSIGN,
 };
 
 struct AstStatement
@@ -72,12 +73,13 @@ struct AstStatement
         };
         struct
         {
-            AstExpression* expression; // useb by DECLARE, ASSIGN, IF and PRINT
+            AstExpression* expression; // useb by DECLARE, ASSIGN, DERF_ASSIGN, IF and PRINT
             union
             {
                 const char* var_name;           // used by DECLARE and ASSIGN
                 AstStatement*  true_statement;  // used by IF
                 bool print_as_char;             // used by PRINT
+                AstExpression* addr_expresson;  // used by DERF_ASSIGN
             };
         };
     };

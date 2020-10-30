@@ -240,18 +240,6 @@ int compile_statement(CompileCtx& cc, AstStatement* stmt)
                 cc.program_data.push_back(addr);
                 cc.var_addr.push_back(cc.program_data.size()-1);
             } break;
-        case StatementType::PRINT:
-            {
-                unsigned long beginning_addr = cc.program_data.size();
-                if(compile_expression(cc, stmt->expression))
-                {
-                    cc.program_line_num.push_back({beginning_addr, stmt->loc.line});
-                    if(stmt->print_as_char)
-                        cc.program_data.push_back((int)OpCode::PRINTC);
-                    else
-                        cc.program_data.push_back((int)OpCode::PRINT);
-                }
-            } break;
         case StatementType::ASSIGN:
             {
                 unsigned long beginning_addr = cc.program_data.size();
@@ -265,6 +253,18 @@ int compile_statement(CompileCtx& cc, AstStatement* stmt)
                     cc.program_data.push_back((int)OpCode::MOVED);
                     cc.program_data.push_back(addr);
                     cc.var_addr.push_back(cc.program_data.size()-1);
+                }
+            } break;
+        case StatementType::PRINT:
+            {
+                unsigned long beginning_addr = cc.program_data.size();
+                if(compile_expression(cc, stmt->expression))
+                {
+                    cc.program_line_num.push_back({beginning_addr, stmt->loc.line});
+                    if(stmt->print_as_char)
+                        cc.program_data.push_back((int)OpCode::PRINTC);
+                    else
+                        cc.program_data.push_back((int)OpCode::PRINT);
                 }
             } break;
     }

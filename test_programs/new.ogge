@@ -1,12 +1,3 @@
-var VAR_A = 42
-var NEW_LINE = 10
-var VAR_B
-VAR_B = 5 + 23 * 4 + *VAR_A <= 57 / 8 & @4 ^ ~*VAR_A + >><<>>3 * 5478 - alloc
+var VAR_A
+var VAR_B = *VAR_A
 print VAR_B
-printc NEW_LINE
-if 1 VAR_B = 44
-print VAR_A
-printc NEW_LINE
-print 10
-printc NEW_LINE
-print 22
