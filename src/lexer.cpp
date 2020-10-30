@@ -106,8 +106,16 @@ Token fetch_token(LexerContext& ctx)
 
         if( c == EOF )
         {
-            new_token.type = TokenType::NO_TOKEN;
-            break;
+            if(buf_size == 0)
+            {
+                new_token.type = TokenType::NO_TOKEN;
+                break;
+            }
+            else
+            {
+                buf[buf_size] = '\0';
+                break;
+            }
         }
         if( is_token(c) )
         {
@@ -196,7 +204,6 @@ Token fetch_token(LexerContext& ctx)
 
     Token t = ctx.current_token;
     ctx.current_token = new_token;
-    print_token(t);
     return t;
 }
 

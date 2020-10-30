@@ -479,6 +479,42 @@ AstStatement* parse_statement(LexerContext& lexer, BlockAlloc& alloc)
                 if(t.type != TokenType::NEW_LINE)
                     report_error("Unexpected symbol.", t.loc);
             } break;
+        case TokenType::DERF:
+            {
+                AstExpression* ae = parse_single_expression(lexer, alloc);
+                if(ae == nullptr)
+                {
+                    report_error("Expeted an expression after dereference", token.loc);
+                    break;
+                }
+
+                if(!is_double_arg_expression(ae))
+                {
+                    Token t = fetch_token(lexer);
+                    if(t.type != TokenType::ASSIGN)
+                    {
+                        report_error("Expected a '=' here.", t.loc);
+                        break;
+                    }
+
+                    AstExpression* e = parse_expression(lexer, alloc);
+                    if(e == nullptr)
+                    {
+                        report_error("Expected an expression after this.", t.loc);
+                        break;
+                    }
+
+                    new_statement = (AstStatement*)allocate(alloc, sizeof(AstStatement));
+                    new_statement->type = StatementType::DERF_ASSIGN;
+                    new_statement->addr_expression = ae;
+                    new_statement->expression = e;
+                }
+                else
+                {
+                    report_error("Expected varaiable here.", ae->loc);
+                    break;
+                }
+            } break;
         default:
             break;
     }
@@ -513,7 +549,6 @@ AstStatement* parse(LexerContext& lexer, BlockAlloc& alloc)
             current = current->next;
         }
     }
-
 
     return root;
 }

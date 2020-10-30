@@ -39,8 +39,9 @@ int main(int argc, char** argv)
     //for(int i = 0; i < code.size; i++)
     //    printf("%d\n", code.data[i]);
 
-    printf("__________________\n");
 
+    print_opcodes(code);
+    printf("__________________\n");
     run(code);
 
     delete code.data;

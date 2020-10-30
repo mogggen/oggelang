@@ -79,7 +79,7 @@ struct AstStatement
                 const char* var_name;           // used by DECLARE and ASSIGN
                 AstStatement*  true_statement;  // used by IF
                 bool print_as_char;             // used by PRINT
-                AstExpression* addr_expresson;  // used by DERF_ASSIGN
+                AstExpression* addr_expression;  // used by DERF_ASSIGN
             };
         };
     };

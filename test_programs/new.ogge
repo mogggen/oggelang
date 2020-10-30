@@ -1,3 +1,7 @@
-var VAR_A
+var NEW_LINE = 10
+var VAR_A = 7
 var VAR_B = *VAR_A
 print VAR_B
+@VAR_B = 69
+printc NEW_LINE
+print VAR_A

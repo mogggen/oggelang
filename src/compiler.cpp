@@ -164,9 +164,9 @@ bool compile_expression(CompileCtx& cc, AstExpression* expr)
         case ExpressionType::REF:
             {
                 int addr = get_variable(cc.var_table, expr->var_name, expr->loc);
-                if(addr > 0)
+                if(addr >= 0)
                 {
-                    cc.program_data.push_back((int)OpCode::REF);
+                    cc.program_data.push_back((int)OpCode::PUSHC);
                     cc.program_data.push_back(addr);
                     cc.var_addr.push_back(cc.program_data.size()-1);
                 }
@@ -174,7 +174,7 @@ bool compile_expression(CompileCtx& cc, AstExpression* expr)
         case ExpressionType::VARIABLE:
             {
                 int addr = get_variable(cc.var_table, expr->var_name, expr->loc);
-                if(addr > 0)
+                if(addr >= 0)
                 {
                     cc.program_data.push_back((int)OpCode::PUSHV);
                     cc.program_data.push_back(addr);
@@ -255,6 +255,18 @@ int compile_statement(CompileCtx& cc, AstStatement* stmt)
                     cc.var_addr.push_back(cc.program_data.size()-1);
                 }
             } break;
+        case StatementType::DERF_ASSIGN:
+            {
+                unsigned long beginning_addr = cc.program_data.size();
+                if(!compile_expression(cc, stmt->addr_expression))
+                    break;
+
+                if(!compile_expression(cc, stmt->expression))
+                    break;
+
+                cc.program_line_num.push_back({beginning_addr, stmt->loc.line});
+                cc.program_data.push_back((int)OpCode::MOVE);
+            } break;
         case StatementType::PRINT:
             {
                 unsigned long beginning_addr = cc.program_data.size();
@@ -298,29 +310,29 @@ ByteCode compile(AstStatement* root)
         cc.program_data[a] += cc.program_data.size();
 
     // print compile result
-    printf("\nprogram data:\n");
-    int j = 0;
-    for(int i = 0; i < cc.program_data.size() ; i++)
-    {
-        printf("%d", cc.program_data[i]);
-        if( j < cc.program_line_num.size() && i == cc.program_line_num[j].addr )
-            printf(" %d\n", cc.program_line_num[j++].line_num);
-        else
-        {
-            bool found = false;
-            for(auto s : cc.goto_addr)
-            {
-                if(s.addr == i)
-                {
-                    printf(" goto %d\n", s.line_num);
-                    found = true;
-                    break;
-                }
-            }
-            if(!found)
-                printf("\n");
-        }
-    }
+    //printf("\nprogram data:\n");
+    //int j = 0;
+    //for(int i = 0; i < cc.program_data.size() ; i++)
+    //{
+    //    printf("%d", cc.program_data[i]);
+    //    if( j < cc.program_line_num.size() && i == cc.program_line_num[j].addr )
+    //        printf(" %d\n", cc.program_line_num[j++].line_num);
+    //    else
+    //    {
+    //        bool found = false;
+    //        for(auto s : cc.goto_addr)
+    //        {
+    //            if(s.addr == i)
+    //            {
+    //                printf(" goto %d\n", s.line_num);
+    //                found = true;
+    //                break;
+    //            }
+    //        }
+    //        if(!found)
+    //            printf("\n");
+    //    }
+    //}
 
     
     printf("\n%d variables\n", cc.n_variables);
