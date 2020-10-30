@@ -18,7 +18,7 @@ struct CompileCtx
 {
     std::vector<int> program_data;
     std::vector<AddrLinenum> program_line_num;
-    std::vector<int> static_data;
+    int n_variables = 0;
     std::unordered_map<unsigned long, int> var_table;
     std::vector<int> var_addr;
     std::vector<AddrLinenum> goto_addr;
@@ -49,10 +49,128 @@ bool add_variable(std::unordered_map<unsigned long, int>& var_table, const char*
         return true;
 }
 
-int compile_expression(CompileCtx& cc, AstExpression* expr)
+bool compile_expression(CompileCtx& cc, AstExpression* expr)
 {
     switch(expr->type)
     {
+        case ExpressionType::EQUAL:
+            {
+                compile_expression(cc, expr->param_a);
+                compile_expression(cc, expr->param_b);
+                cc.program_data.push_back((int)OpCode::CMP);
+                cc.program_data.push_back((int)CmpTypes::EQUAL);
+            } break;
+        case ExpressionType::NEQUAL:
+            {
+                compile_expression(cc, expr->param_a);
+                compile_expression(cc, expr->param_b);
+                cc.program_data.push_back((int)OpCode::CMP);
+                cc.program_data.push_back((int)CmpTypes::NOT_EQUAL);
+            } break;
+        case ExpressionType::LEQUAL:
+            {
+                compile_expression(cc, expr->param_a);
+                compile_expression(cc, expr->param_b);
+                cc.program_data.push_back((int)OpCode::CMP);
+                cc.program_data.push_back((int)CmpTypes::LESS_EQUAL);
+            } break;
+        case ExpressionType::GEQUAL:
+            {
+                compile_expression(cc, expr->param_a);
+                compile_expression(cc, expr->param_b);
+                cc.program_data.push_back((int)OpCode::CMP);
+                cc.program_data.push_back((int)CmpTypes::GREATER_EQUAL);
+            } break;
+        case ExpressionType::LESS:
+            {
+                compile_expression(cc, expr->param_a);
+                compile_expression(cc, expr->param_b);
+                cc.program_data.push_back((int)OpCode::CMP);
+                cc.program_data.push_back((int)CmpTypes::LESS);
+            } break;
+        case ExpressionType::GREATER:
+            {
+                compile_expression(cc, expr->param_a);
+                compile_expression(cc, expr->param_b);
+                cc.program_data.push_back((int)OpCode::CMP);
+                cc.program_data.push_back((int)CmpTypes::GREATER);
+            } break;
+
+        case ExpressionType::ADD:
+            {
+                compile_expression(cc, expr->param_a);
+                compile_expression(cc, expr->param_b);
+                cc.program_data.push_back((int)OpCode::ADD);
+            } break;
+        case ExpressionType::SUB:
+            {
+                compile_expression(cc, expr->param_a);
+                compile_expression(cc, expr->param_b);
+                cc.program_data.push_back((int)OpCode::SUB);
+            } break;
+        case ExpressionType::MULT:
+            {
+                compile_expression(cc, expr->param_a);
+                compile_expression(cc, expr->param_b);
+                cc.program_data.push_back((int)OpCode::MULT);
+            } break;
+        case ExpressionType::DIV:
+            {
+                compile_expression(cc, expr->param_a);
+                compile_expression(cc, expr->param_b);
+                cc.program_data.push_back((int)OpCode::DIV);
+            } break;
+
+        case ExpressionType::AND:
+            {
+                compile_expression(cc, expr->param_a);
+                compile_expression(cc, expr->param_b);
+                cc.program_data.push_back((int)OpCode::AND);
+            } break;
+        case ExpressionType::OR:
+            {
+                compile_expression(cc, expr->param_a);
+                compile_expression(cc, expr->param_b);
+                cc.program_data.push_back((int)OpCode::OR);
+            } break;
+        case ExpressionType::XOR:
+            {
+                compile_expression(cc, expr->param_a);
+                compile_expression(cc, expr->param_b);
+                cc.program_data.push_back((int)OpCode::XOR);
+            } break;
+
+
+        case ExpressionType::NOT:
+            {
+                compile_expression(cc, expr->param_a);
+                cc.program_data.push_back((int)OpCode::NOT);
+            } break;
+        case ExpressionType::LSHIFT:
+            {
+                compile_expression(cc, expr->param_a);
+                cc.program_data.push_back((int)OpCode::LSHIFT);
+            } break;
+        case ExpressionType::RSHIFT:
+            {
+                compile_expression(cc, expr->param_a);
+                cc.program_data.push_back((int)OpCode::RSHIFT);
+            } break;
+        case ExpressionType::DERF:
+            {
+                compile_expression(cc, expr->param_a);
+                cc.program_data.push_back((int)OpCode::DERF);
+            } break;
+        case ExpressionType::REF:
+            {
+                int addr = get_variable(cc.var_table, expr->var_name, expr->loc);
+                if(addr > 0)
+                {
+                    cc.program_data.push_back((int)OpCode::REF);
+                    cc.program_data.push_back(addr);
+                    cc.var_addr.push_back(cc.program_data.size()-1);
+                }
+            } break;
         case ExpressionType::VARIABLE:
             {
                 int addr = get_variable(cc.var_table, expr->var_name, expr->loc);
@@ -62,7 +180,6 @@ int compile_expression(CompileCtx& cc, AstExpression* expr)
                     cc.program_data.push_back(addr);
                     cc.var_addr.push_back(cc.program_data.size()-1);
                 }
-                    
             } break;
         case ExpressionType::CONSTANT:
             {
@@ -78,31 +195,6 @@ int compile_expression(CompileCtx& cc, AstExpression* expr)
     }
 
     return true;
-}
-
-bool eval_expression(CompileCtx& cc, AstExpression* expr, int* v)
-{
-    switch(expr->type)
-    {
-        case ExpressionType::VARIABLE:
-            {
-                int addr = get_variable(cc.var_table, expr->var_name, expr->loc);
-                if( addr > 0 )
-                {
-                    *v = cc.static_data[addr];
-                    return true;
-                }
-            } break;
-        case ExpressionType::CONSTANT:
-            {
-                *v = expr->value;
-                return true;
-            }
-        case ExpressionType::ALLOC:
-        default:
-            return false;
-    }
-    return false;
 }
 
 int compile_statement(CompileCtx& cc, AstStatement* stmt)
@@ -133,15 +225,20 @@ int compile_statement(CompileCtx& cc, AstStatement* stmt)
             } break;
         case StatementType::DECLARE:
             {
-                int addr = cc.static_data.size();
+                int addr = cc.n_variables;
+                cc.n_variables++;
+
                 if(!add_variable(cc.var_table, stmt->var_name, addr, stmt->loc))
                     break;
                 
-                int v;
-                if( eval_expression(cc, stmt->expression, &v) )
-                {
-                    cc.static_data.push_back(v);
-                }
+                unsigned long beginning_addr = cc.program_data.size();
+                if(!compile_expression(cc, stmt->expression))
+                    break;
+
+                cc.program_line_num.push_back({beginning_addr, stmt->loc.line});
+                cc.program_data.push_back((int)OpCode::MOVED);
+                cc.program_data.push_back(addr);
+                cc.var_addr.push_back(cc.program_data.size()-1);
             } break;
         case StatementType::PRINT:
             {
@@ -226,18 +323,16 @@ ByteCode compile(AstStatement* root)
     }
 
     
-    printf("\nstatic data:\n");
-    for(int i : cc.static_data)
-        printf("%d\n", i);
+    printf("\n%d variables\n", cc.n_variables);
     
 
-    int size = cc.program_data.size() + cc.static_data.size();
+    int size = cc.program_data.size() + cc.n_variables;
     int* data = new int[size];
     for(int i=0; i<cc.program_data.size(); i++)
         data[i] = cc.program_data[i];
     
-    for(int i=0; i<cc.static_data.size(); i++)
-        data[i + cc.program_data.size()] = cc.static_data[i];
+    for(int i=0; i<cc.n_variables; i++)
+        data[i + cc.program_data.size()] = 0;
 
     return ByteCode{size, (int)cc.program_data.size(), data};
 }

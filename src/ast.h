@@ -20,8 +20,8 @@ enum class ExpressionType
     AND,
     OR,
     XOR,
+     
     NOT,
-
     LSHIFT,
     RSHIFT,
 

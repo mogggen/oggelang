@@ -34,7 +34,7 @@ void* allocate(BlockAlloc& alloc, int size)
         alloc.current = alloc.current->next; 
     
         alloc.current->next = nullptr;
-        alloc.size = 0;
+        alloc.size = size;
     
         return (void*)alloc.current->data;
     }

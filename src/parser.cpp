@@ -4,13 +4,21 @@
 
 AstExpression* parse_expression(LexerContext& lexer, BlockAlloc& alloc);
 
+bool is_double_arg_expression(AstExpression* e)
+{
+    return  e->type != ExpressionType::NOT &&
+            e->type != ExpressionType::LSHIFT &&
+            e->type != ExpressionType::RSHIFT &&
+            e->type != ExpressionType::REF &&
+            e->type != ExpressionType::DERF &&
+            e->type != ExpressionType::VARIABLE &&
+            e->type != ExpressionType::ALLOC && 
+            e->type != ExpressionType::CONSTANT;
+}
+
 AstExpression* balance_expression(AstExpression* expr)
 {
-    if( expr->type != ExpressionType::ALLOC && 
-        expr->type != ExpressionType::CONSTANT && 
-        expr->type != ExpressionType::VARIABLE &&
-        expr->type != ExpressionType::REF &&
-        expr->type != ExpressionType::DERF)
+    if(is_double_arg_expression(expr))
     {
         AstExpression* right_expr = expr->param_b;
 
@@ -24,6 +32,161 @@ AstExpression* balance_expression(AstExpression* expr)
         }
     }
 
+    return expr;
+}
+
+AstExpression* parse_single_expression(LexerContext& lexer, BlockAlloc& alloc)
+{
+    Token t = fetch_token(lexer);
+    AstExpression* expr = nullptr; 
+    switch(t.type)
+    {
+        case TokenType::IDENTIFIER:
+            {
+                expr = (AstExpression*)allocate(alloc, sizeof(AstExpression));
+                expr->type = ExpressionType::VARIABLE;
+                expr->var_name = t.data;
+            } break;
+        case TokenType::CONSTANT:
+            {
+                expr = (AstExpression*)allocate(alloc, sizeof(AstExpression));
+                expr->type = ExpressionType::CONSTANT;
+                expr->value = t.value;
+            } break;
+        case TokenType::ALLOC:
+            {
+                expr = (AstExpression*)allocate(alloc, sizeof(AstExpression));
+                expr->type = ExpressionType::ALLOC;
+            } break;
+        case TokenType::REF:
+            {
+                Token t = peek_token(lexer);
+                if(t.type == TokenType::IDENTIFIER)
+                {
+                    fetch_token(lexer);
+                    expr = (AstExpression*)allocate(alloc, sizeof(AstExpression));
+                    expr->type = ExpressionType::REF;
+                    expr->var_name = t.data;
+                }
+                else
+                {
+                    report_error("Expected a variable after reference.", t.loc);
+                    return nullptr;
+                }
+            } break;
+        case TokenType::DERF:
+            {
+                AstExpression* e = parse_single_expression(lexer, alloc);
+                if(e == nullptr)
+                {
+                    report_error("Expected expression after dereference.", t.loc);
+                    return nullptr;
+                }
+
+                if(!is_double_arg_expression(e))
+                {
+                    expr = (AstExpression*)allocate(alloc, sizeof(AstExpression));
+                    expr->type = ExpressionType::DERF;
+                    expr->param_a = e;
+                }
+                else
+                {
+                    report_error("Expected a variable here.", e->loc);
+                    return nullptr;
+                }
+            } break;
+        case TokenType::NOT:
+            {
+                AstExpression* e = parse_single_expression(lexer, alloc);
+                if(e == nullptr)
+                {
+                    report_error("Expected expression after '~'.", t.loc);
+                    return nullptr;
+                }
+
+                if(!is_double_arg_expression(e))
+                {
+                    expr = (AstExpression*)allocate(alloc, sizeof(AstExpression));
+                    expr->type = ExpressionType::NOT;
+                    expr->param_a = e;
+                }
+                else
+                {
+                    report_error("Expected variable here.", e->loc);
+                    return nullptr;
+                }
+                
+            } break;
+        case TokenType::LESS:
+            {
+                Token t = fetch_token(lexer);
+                if(t.type == TokenType::LESS)
+                {
+                    AstExpression* e = parse_single_expression(lexer, alloc);
+                    if(e == nullptr)
+                    {
+                        report_error("Expected expression after '<<'.", t.loc);
+                        return nullptr;
+                    }
+
+                    if(!is_double_arg_expression(e))
+                    {
+                        expr = (AstExpression*)allocate(alloc, sizeof(AstExpression));
+                        expr->type = ExpressionType::LSHIFT;
+                        expr->param_a = e;
+                    }
+                    else
+                    {
+                        report_error("Expected a Variable or constant.", e->loc);
+                        return nullptr;
+                    }
+
+                }
+                else
+                {
+                    report_error("Unexpected symbol.", t.loc);
+                    return nullptr;
+                }
+            } break;
+        case TokenType::GREATER:
+            {
+                Token t = fetch_token(lexer);
+                if(t.type == TokenType::GREATER)
+                {
+                    AstExpression* e = parse_single_expression(lexer, alloc);
+                    if(e == nullptr)
+                    {
+                        report_error("Expected expression after '>>'", t.loc);
+                        return nullptr;
+                    }
+
+                    if(!is_double_arg_expression(e))
+                    {
+                        expr = (AstExpression*)allocate(alloc, sizeof(AstExpression));
+                        expr->type = ExpressionType::RSHIFT;
+                        expr->param_a = e;
+                    }
+                    else
+                    {
+                        report_error("Expected a Variable or constant.", e->loc);
+                        return nullptr;
+                    }
+
+                }
+                else
+                {
+                    report_error("Unexpected symbol.", t.loc);
+                    return nullptr;
+                }
+            } break;
+        default:
+            { 
+                report_error("Expected an expression.", t.loc);
+                return nullptr;
+            } break;
+    }
+
+    expr->loc = t.loc;
     return expr;
 }
 
@@ -43,7 +206,6 @@ AstExpression* parse_operator_expression(LexerContext& lexer, BlockAlloc& alloc,
         case TokenType::AND: type       = ExpressionType::AND; break;
         case TokenType::OR: type        = ExpressionType::OR; break;
         case TokenType::XOR: type       = ExpressionType::XOR; break;
-        case TokenType::NOT: type       = ExpressionType::NOT; break;
         case TokenType::LESS:
             {
                 fetch_token(lexer);
@@ -104,6 +266,8 @@ AstExpression* parse_operator_expression(LexerContext& lexer, BlockAlloc& alloc,
             }
     }
 
+
+
     if(!has_fetched)
         fetch_token(lexer);
 
@@ -115,6 +279,7 @@ AstExpression* parse_operator_expression(LexerContext& lexer, BlockAlloc& alloc,
 
     AstExpression* oper = (AstExpression*)allocate(alloc, sizeof(AstExpression)); 
     oper->type = type;
+    oper->loc = t.loc;
     oper->param_a = left_expr;
     oper->param_b = right_expr;
 
@@ -126,68 +291,10 @@ AstExpression* parse_operator_expression(LexerContext& lexer, BlockAlloc& alloc,
 
 AstExpression* parse_expression(LexerContext& lexer, BlockAlloc& alloc)
 {
-    Token t = fetch_token(lexer);
-    AstExpression* expr = nullptr; 
-    switch(t.type)
-    {
-        case TokenType::IDENTIFIER:
-            {
-                expr = (AstExpression*)allocate(alloc, sizeof(AstExpression));
-                expr->type = ExpressionType::VARIABLE;
-                expr->var_name = t.data;
-            } break;
-        case TokenType::CONSTANT:
-            {
-                expr = (AstExpression*)allocate(alloc, sizeof(AstExpression));
-                expr->type = ExpressionType::CONSTANT;
-                expr->value = t.value;
-            } break;
-        case TokenType::ALLOC:
-            {
-                expr = (AstExpression*)allocate(alloc, sizeof(AstExpression));
-                expr->type = ExpressionType::ALLOC;
-            } break;
-        case TokenType::REF:
-            {
-                AstExpression* e = parse_expression(lexer, alloc);
-                if(e == nullptr)
-                    return nullptr;
-
-                if(e->type == ExpressionType::VARIABLE)
-                {
-                    expr = (AstExpression*)allocate(alloc, sizeof(AstExpression));
-                    expr->type = ExpressionType::REF;
-                    expr->param_a = e;
-                }
-                else
-                {
-                    report_error("Expected a variable here.", e->loc);
-                }
-            } break;
-        case TokenType::DERF:
-            {
-                AstExpression* e = parse_expression(lexer, alloc);
-                if(e == nullptr)
-                    return nullptr;
-
-                if(e->type == ExpressionType::VARIABLE)
-                {
-                    expr = (AstExpression*)allocate(alloc, sizeof(AstExpression));
-                    expr->type = ExpressionType::DERF;
-                    expr->param_a = e;
-                }
-                else
-                {
-                    report_error("Expected a variable here.", e->loc);
-                }
-            } break;
-        default:
-            { 
-                report_error("Expected an expression.", t.loc);
-                return nullptr;
-            } break;
-    }
-
+    AstExpression* expr = parse_single_expression(lexer, alloc);
+    if(expr == nullptr)
+        return nullptr;
+    
     AstExpression* rest = parse_operator_expression(lexer, alloc, expr);
 
     if(rest != nullptr)
@@ -251,8 +358,6 @@ AstStatement* parse_statement(LexerContext& lexer, BlockAlloc& alloc)
                 AstExpression* expression = parse_expression(lexer, alloc);
                 if(expression != nullptr)
                 {
-                    fetch_token(lexer);
-
                     AstStatement* statement = parse_statement(lexer, alloc);;
                     if(statement != nullptr)
                     {

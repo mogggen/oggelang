@@ -93,7 +93,6 @@ void print_expression(AstExpression* expr, int indent)
             {
                 printf("NOT\n");
                 print_expression(expr->param_a, indent+2);
-                print_expression(expr->param_b, indent+2);
             } break;
         case ExpressionType::LSHIFT:
             {
@@ -112,6 +111,7 @@ void print_expression(AstExpression* expr, int indent)
         case ExpressionType::DERF:
             {
                 printf("DERF %s\n", expr->var_name);
+                print_expression(expr->param_a, indent+2);
             } break;
         case ExpressionType::VARIABLE:
             {

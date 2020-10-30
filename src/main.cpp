@@ -31,7 +31,7 @@ int main(int argc, char** argv)
         print_statement(root);
     }
 
-    //ByteCode code = compile(root);
+    ByteCode code = compile(root);
 
     dealloc(alloc);
 
@@ -39,11 +39,11 @@ int main(int argc, char** argv)
     //for(int i = 0; i < code.size; i++)
     //    printf("%d\n", code.data[i]);
 
-    //printf("__________________\n");
+    printf("__________________\n");
 
-    //run(code);
+    run(code);
 
-    //delete code.data;
+    delete code.data;
     
     return 0;
 }
