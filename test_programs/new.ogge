@@ -5,3 +5,10 @@ print VAR_B
 @++*NEW_LINE = 70
 printc NEW_LINE
 print VAR_A
+var VAR_C = 0
+printc NEW_LINE
+print VAR_C
+VAR_C = ++VAR_C
+if VAR_C < 10 goto :9
+printc NEW_LINE
+print 100

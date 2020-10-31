@@ -117,8 +117,8 @@ void run(ByteCode code)
                 } break;
             case OpCode::CMP:
                 {
-                    int a = pop(stack);
                     int b = pop(stack);
+                    int a = pop(stack);
                     switch((CmpTypes)mem[pc++])
                     {
                         case CmpTypes::EQUAL:         push(stack, a == b ? 1 : 0 ); break;
@@ -208,7 +208,7 @@ void print_opcodes(ByteCode code)
             case OpCode::XOR:       printf("XOR\n"); break;
             case OpCode::CMP:       
                 {
-                    printf("CMP "); break;
+                    printf("CMP ");
                     switch((CmpTypes)code.data[pc++])
                     {
                         case CmpTypes::EQUAL: printf("EQUAL\n"); break;

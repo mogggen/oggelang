@@ -22,6 +22,8 @@ struct CompileCtx
     std::unordered_map<unsigned long, int> var_table;
     std::vector<int> var_addr;
     std::vector<AddrLinenum> goto_addr;
+    unsigned long filename_hash;
+    std::vector<const char*> dependent_files;
 };
 
 int get_variable(std::unordered_map<unsigned long, int>& var_table, const char* name, FileLocation loc)
@@ -222,21 +224,28 @@ int compile_statement(CompileCtx& cc, AstStatement* stmt)
 {
     int prev_size = cc.program_data.size();
 
+    unsigned long beginning_addr = cc.program_data.size();
+
     switch(stmt->type)
     {
         case StatementType::GOTO:
             {
-                cc.program_line_num.push_back({cc.program_data.size(), stmt->loc.line});
                 cc.program_data.push_back((int)OpCode::GOTO);
-                cc.goto_addr.push_back({cc.program_data.size(), stmt->goto_line_number});
+                if(stmt->goto_filename == nullptr)
+                {
+                    cc.goto_addr.push_back({cc.program_data.size(), cc.filename_hash, stmt->goto_line_number});
+                }
+                else
+                {
+                    cc.goto_addr.push_back({cc.program_data.size(), hash_djb2(stmt->goto_filename), stmt->goto_line_number});
+                    cc.dependent_files.push_back(stmt->goto_filename);
+                }
                 cc.program_data.push_back(0);
             } break;
         case StatementType::IF:
             {
-                unsigned long beginning_addr = cc.program_data.size();
                 if(compile_expression(cc, stmt->expression))
                 {
-                    cc.program_line_num.push_back({beginning_addr, stmt->loc.line});
                     cc.program_data.push_back((int)OpCode::IF);
                     int location = cc.program_data.size();
                     cc.program_data.push_back(0);
@@ -252,25 +261,21 @@ int compile_statement(CompileCtx& cc, AstStatement* stmt)
                 if(!add_variable(cc.var_table, stmt->var_name, addr, stmt->loc))
                     break;
                 
-                unsigned long beginning_addr = cc.program_data.size();
                 if(!compile_expression(cc, stmt->expression))
                     break;
 
-                cc.program_line_num.push_back({beginning_addr, stmt->loc.line});
                 cc.program_data.push_back((int)OpCode::MOVED);
                 cc.program_data.push_back(addr);
                 cc.var_addr.push_back(cc.program_data.size()-1);
             } break;
         case StatementType::ASSIGN:
             {
-                unsigned long beginning_addr = cc.program_data.size();
                 if(!compile_expression(cc, stmt->expression))
                     break;
 
                 int addr = get_variable(cc.var_table, stmt->var_name, stmt->loc);
                 if(addr > 0)
                 {
-                    cc.program_line_num.push_back({beginning_addr, stmt->loc.line});
                     cc.program_data.push_back((int)OpCode::MOVED);
                     cc.program_data.push_back(addr);
                     cc.var_addr.push_back(cc.program_data.size()-1);
@@ -278,22 +283,18 @@ int compile_statement(CompileCtx& cc, AstStatement* stmt)
             } break;
         case StatementType::DERF_ASSIGN:
             {
-                unsigned long beginning_addr = cc.program_data.size();
                 if(!compile_expression(cc, stmt->addr_expression))
                     break;
 
                 if(!compile_expression(cc, stmt->expression))
                     break;
 
-                cc.program_line_num.push_back({beginning_addr, stmt->loc.line});
                 cc.program_data.push_back((int)OpCode::MOVE);
             } break;
         case StatementType::PRINT:
             {
-                unsigned long beginning_addr = cc.program_data.size();
                 if(compile_expression(cc, stmt->expression))
                 {
-                    cc.program_line_num.push_back({beginning_addr, stmt->loc.line});
                     if(stmt->print_as_char)
                         cc.program_data.push_back((int)OpCode::PRINTC);
                     else
@@ -302,12 +303,19 @@ int compile_statement(CompileCtx& cc, AstStatement* stmt)
             } break;
     }
 
+    if (beginning_addr != cc.program_data.size())
+    {
+        // a statement was added.
+        cc.program_line_num.push_back({beginning_addr, cc.filename_hash, stmt->loc.line});
+    }
+
     return cc.program_data.size() - prev_size;
 }
 
 ByteCode compile(AstStatement* root)
 {
     CompileCtx cc; 
+    cc.filename_hash = hash_djb2(root->loc.filename);
 
     AstStatement* statement = root;
     while(statement != nullptr)
@@ -315,6 +323,10 @@ ByteCode compile(AstStatement* root)
         compile_statement(cc, statement);
         statement = statement->next;
     }
+
+
+
+
 
     for(auto g : cc.goto_addr)
     {
@@ -330,37 +342,12 @@ ByteCode compile(AstStatement* root)
     for(auto a : cc.var_addr)
         cc.program_data[a] += cc.program_data.size();
 
-    // print compile result
-    //printf("\nprogram data:\n");
-    //int j = 0;
-    //for(int i = 0; i < cc.program_data.size() ; i++)
-    //{
-    //    printf("%d", cc.program_data[i]);
-    //    if( j < cc.program_line_num.size() && i == cc.program_line_num[j].addr )
-    //        printf(" %d\n", cc.program_line_num[j++].line_num);
-    //    else
-    //    {
-    //        bool found = false;
-    //        for(auto s : cc.goto_addr)
-    //        {
-    //            if(s.addr == i)
-    //            {
-    //                printf(" goto %d\n", s.line_num);
-    //                found = true;
-    //                break;
-    //            }
-    //        }
-    //        if(!found)
-    //            printf("\n");
-    //    }
-    //}
-
-    
     printf("\n%d variables\n", cc.n_variables);
     
 
     int size = cc.program_data.size() + cc.n_variables;
     int* data = new int[size];
+
     for(int i=0; i<cc.program_data.size(); i++)
         data[i] = cc.program_data[i];
     

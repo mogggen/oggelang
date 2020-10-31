@@ -4,13 +4,6 @@
 #include <vector>
 #include "compiler.h"
 
-struct ByteCode
-{
-    int size;
-    int code_size;
-    int* data;
-};
-
 ByteCode link(std::vector<CompiledObj> compiled_objects);
 
 #endif

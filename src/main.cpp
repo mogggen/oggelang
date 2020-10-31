@@ -8,8 +8,34 @@
 #include "interpreter.h"
 #include "error.h"
 
+struct Settings
+{
+    bool print_ast_tree = false;
+    bool print_opcodes = false;
+    const char* filename = nullptr;
+};
+
+Settings parse_cliargs(int argc, char** argv)
+{
+    Settings settings;
+
+    for(int i = 1; i < argc; i++)
+    {
+        char* str = argv[i];
+        if(strcmp(str, "-print_ast"))
+            settings.print_ast_tree = true;
+        else if(strcmp(str, "-print_ast"))
+            settings.print_opcodes = true;
+        else
+            settings.filename = str;
+    }
+
+    return settings;
+}
+
 int main(int argc, char** argv)
 {
+
     LexerContext lexer;
     if(!create_lexer(&lexer, "test_programs/new.ogge"))
     {
@@ -25,7 +51,7 @@ int main(int argc, char** argv)
         
     if( num_error > 0 )
         printf("Compilation failed with %d errors.", num_error);
-    else
+    else if(true)
     {
         printf("AST:\n");
         print_statement(root);
@@ -40,8 +66,12 @@ int main(int argc, char** argv)
     //    printf("%d\n", code.data[i]);
 
 
-    print_opcodes(code);
-    printf("__________________\n");
+    if(true)
+    {
+        print_opcodes(code);
+        printf("__________________\n");
+    }
+
     run(code);
 
     delete code.data;
