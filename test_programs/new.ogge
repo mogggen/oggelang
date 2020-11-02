@@ -12,4 +12,4 @@ j = 1
 var list = alloc
 var k = list
 @k = i
-@++k = allo"c
+@++k = alloc

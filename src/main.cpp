@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "block_alloc.h"
 #include "lexer.h"
@@ -10,7 +11,7 @@
 
 struct Settings
 {
-    bool print_ast_tree = false;
+    bool print_ast = false;
     bool print_opcodes = false;
     const char* filename = nullptr;
 };
@@ -21,60 +22,73 @@ Settings parse_cliargs(int argc, char** argv)
 
     for(int i = 1; i < argc; i++)
     {
-        char* str = argv[i];
-        if(strcmp(str, "-print_ast"))
-            settings.print_ast_tree = true;
-        else if(strcmp(str, "-print_ast"))
-            settings.print_opcodes = true;
+        if(*(argv+i)[0] == '-')
+        {
+            if(strcmp(*(argv+i), "-print_ast") == 0)
+                settings.print_ast = true;
+            else if(strcmp(*(argv+i), "-print_opcodes") == 0)
+                settings.print_opcodes = true;
+            else
+            {
+                printf("%s Is invalid flag.\n", *(argv+i));
+            }
+        }
         else
-            settings.filename = str;
+            settings.filename = *(argv+i);
     }
 
     return settings;
 }
 
-int main(int argc, char** argv)
+int compile(const char* filename, ByteCode* code)
 {
-
     LexerContext lexer;
-    if(!create_lexer(&lexer, "test_programs/new.ogge"))
+    if(!create_lexer(&lexer, filename))
     {
-        printf("Could not open file.\n");
+        printf("Could not open file: %s\n", filename);
         return 0;
     }
-
-    //printf("Tokens: \n");
 
     BlockAlloc alloc = create_block_alloc(1024);
 
     AstStatement* root = parse(lexer, alloc);
         
-    if( num_error > 0 )
-        printf("Compilation failed with %d errors.", num_error);
-    else if(true)
+    if( get_num_error() > 0 )
     {
-        printf("AST:\n");
-        print_statement(root);
+        printf("\nCompilation failed with %d errors.\n", get_num_error());
+        return 0;
     }
 
-    ByteCode code = compile(root);
+    *code = compile(root);
 
     dealloc(alloc);
 
-    //printf("\nbyte code:\n");
-    //for(int i = 0; i < code.size; i++)
-    //    printf("%d\n", code.data[i]);
-
-
-    if(true)
+    if( get_num_error() > 0 )
     {
-        print_opcodes(code);
-        printf("__________________\n");
+        printf("\nCompilation failed with %d errors.\n", get_num_error());
+        delete code->data;
+        return 0;
     }
 
-    run(code);
+    return 1;
+}
 
+int main(int argc, char** argv)
+{
+    Settings settings = parse_cliargs(argc, argv);
+
+    if(settings.filename == nullptr)
+    {
+        printf("No filename specified.\n");
+        return 0;
+    }
+
+    ByteCode code;
+    if(!compile(settings.filename, &code))
+        return 0;
+
+    run(code);
     delete code.data;
-    
+
     return 0;
 }

@@ -11,6 +11,7 @@ add_executable( ogge
     ${src_dir}/main.cpp
     ${src_dir}/block_alloc.cpp
     ${src_dir}/ast.cpp
+    ${src_dir}/error.cpp
     ${src_dir}/lexer.cpp
     ${src_dir}/parser.cpp
     ${src_dir}/compiler.cpp

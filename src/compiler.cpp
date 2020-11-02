@@ -326,11 +326,6 @@ ByteCode compile(AstStatement* root)
     }
 
 
-    for(auto e : cc.program_line_num)
-        printf("\t%3lld:%3d\n", e.addr, e.line_num);
-
-
-
     for(auto g : cc.goto_addr)
     {
         auto it = cc.program_line_num.end();
@@ -344,9 +339,6 @@ ByteCode compile(AstStatement* root)
 
     for(auto a : cc.var_addr)
         cc.program_data[a] += cc.program_data.size();
-
-    printf("\n%d variables\n", cc.n_variables);
-    
 
     int size = cc.program_data.size() + cc.n_variables;
     int* data = new int[size];
