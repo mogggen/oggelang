@@ -11,6 +11,7 @@ nnoremap <f7> :!devenv .<cr><cr>
 nnoremap <leader>g :call ToggleHeader()<cr>
 
 :GuiFont Consolas:h10
+:so highlighting\ogge.vim
 
 command -nargs=1 SetExecutable call SetExe(<f-args>)
 
