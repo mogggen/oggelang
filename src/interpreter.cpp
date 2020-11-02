@@ -192,8 +192,17 @@ void print_opcodes(ByteCode code)
 
     printf("\nNr varaiables: %d\nVariables start at: %d\n\n", code.size -code.code_size, code.code_size );
 
+    int digits = 0;
+    int v = code.code_size;
+    while(v > 0)
+    {
+        digits++;
+        v /= 10;
+    }
+
     while(pc < code.code_size)
     {
+        printf("%*d | ", digits, pc);
         switch((OpCode)code.data[pc++])
         {
             case OpCode::PUSHC:     printf("PUSHC %d\n", code.data[pc++]); break;
@@ -218,7 +227,7 @@ void print_opcodes(ByteCode code)
                         case CmpTypes::LESS: printf("LESS\n"); break;
                         case CmpTypes::GREATER: printf("GREATER\n"); break;
                     }
-                }
+                } break;
             case OpCode::NOT:       printf("NOT\n"); break;
             case OpCode::LSHIFT:    printf("LSHIFT\n"); break;
             case OpCode::RSHIFT:    printf("RSHIFT\n"); break;

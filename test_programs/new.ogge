@@ -6,8 +6,8 @@ if j == 1 goto :8
 print i
 printc NEW_LINE
 i = ++i
-if i < 11 goto :4
-
+if i < 11 goto new.ogge:4
+ 
 j = 1
 var list = alloc
 var k = list

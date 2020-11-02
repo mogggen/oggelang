@@ -240,6 +240,7 @@ int compile_statement(CompileCtx& cc, AstStatement* stmt)
                     cc.goto_addr.push_back({cc.program_data.size(), hash_djb2(stmt->goto_filename), stmt->goto_line_number});
                     cc.dependent_files.push_back(stmt->goto_filename);
                 }
+                cc.program_line_num.push_back({beginning_addr, cc.filename_hash, stmt->loc.line});
                 cc.program_data.push_back(0);
             } break;
         case StatementType::IF:
@@ -247,8 +248,10 @@ int compile_statement(CompileCtx& cc, AstStatement* stmt)
                 if(compile_expression(cc, stmt->expression))
                 {
                     cc.program_data.push_back((int)OpCode::IF);
+                    cc.program_line_num.push_back({beginning_addr, cc.filename_hash, stmt->loc.line});
                     int location = cc.program_data.size();
                     cc.program_data.push_back(0);
+
                     int size = compile_statement(cc, stmt->true_statement);
                     cc.program_data[location] = size;
                 }
@@ -267,6 +270,7 @@ int compile_statement(CompileCtx& cc, AstStatement* stmt)
                 cc.program_data.push_back((int)OpCode::MOVED);
                 cc.program_data.push_back(addr);
                 cc.var_addr.push_back(cc.program_data.size()-1);
+                cc.program_line_num.push_back({beginning_addr, cc.filename_hash, stmt->loc.line});
             } break;
         case StatementType::ASSIGN:
             {
@@ -279,6 +283,7 @@ int compile_statement(CompileCtx& cc, AstStatement* stmt)
                     cc.program_data.push_back((int)OpCode::MOVED);
                     cc.program_data.push_back(addr);
                     cc.var_addr.push_back(cc.program_data.size()-1);
+                    cc.program_line_num.push_back({beginning_addr, cc.filename_hash, stmt->loc.line});
                 }
             } break;
         case StatementType::DERF_ASSIGN:
@@ -290,6 +295,7 @@ int compile_statement(CompileCtx& cc, AstStatement* stmt)
                     break;
 
                 cc.program_data.push_back((int)OpCode::MOVE);
+                cc.program_line_num.push_back({beginning_addr, cc.filename_hash, stmt->loc.line});
             } break;
         case StatementType::PRINT:
             {
@@ -299,14 +305,9 @@ int compile_statement(CompileCtx& cc, AstStatement* stmt)
                         cc.program_data.push_back((int)OpCode::PRINTC);
                     else
                         cc.program_data.push_back((int)OpCode::PRINT);
+                    cc.program_line_num.push_back({beginning_addr, cc.filename_hash, stmt->loc.line});
                 }
             } break;
-    }
-
-    if (beginning_addr != cc.program_data.size())
-    {
-        // a statement was added.
-        cc.program_line_num.push_back({beginning_addr, cc.filename_hash, stmt->loc.line});
     }
 
     return cc.program_data.size() - prev_size;
@@ -325,6 +326,8 @@ ByteCode compile(AstStatement* root)
     }
 
 
+    for(auto e : cc.program_line_num)
+        printf("\t%3lld:%3d\n", e.addr, e.line_num);
 
 
 
