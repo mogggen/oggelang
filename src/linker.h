@@ -4,6 +4,6 @@
 #include <vector>
 #include "compiler.h"
 
-ByteCode link(std::vector<CompiledObj> compiled_objects);
+int link(std::vector<CompiledObj>& compiled_objects, ByteCode* code);
 
 #endif

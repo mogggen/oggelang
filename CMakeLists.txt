@@ -15,6 +15,7 @@ add_executable( ogge
     ${src_dir}/lexer.cpp
     ${src_dir}/parser.cpp
     ${src_dir}/compiler.cpp
+    ${src_dir}/linker.cpp
     ${src_dir}/interpreter.cpp
 )
 

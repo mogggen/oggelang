@@ -9,7 +9,7 @@ endif
 
 syn keyword oggeKeyword var if print printc
 syn keyword oggeKeyword goto nextgroup=oggeLine skipwhite
-syn match oggeLine '[a-z,A-Z,å,ä,ö,Å,Ä,Ö,_,\,/,0-9]*.ogge:[0-9]\+'
+syn match oggeLine '[a-z,A-Z,å,ä,ö,Å,Ä,Ö,_,\,/,0-9]*:[0-9]\+'
 syn match oggeVar '[a-z,A-Z,å,ä,ö,Å,Ä,Ö,_][a-z,A-Z,å,ä,ö,Å,Ä,Ö,_,0-9]*'
 syn match oggeNumber '\d\+'
 syn keyword oggeNumber alloc

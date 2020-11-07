@@ -1,11 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unordered_set>
+#include <queue>
 
 #include "block_alloc.h"
 #include "lexer.h"
 #include "parser.h"
 #include "compiler.h"
+#include "linker.h"
 #include "interpreter.h"
 #include "error.h"
 
@@ -40,34 +43,89 @@ Settings parse_cliargs(int argc, char** argv)
     return settings;
 }
 
-int compile(const char* filename, ByteCode* code)
+int find_last_char(const char* str, char c)
 {
-    LexerContext lexer;
-    if(!create_lexer(&lexer, filename))
+    int last_pos = -1;
+    int i = 0;
+    while(str[i] != '\0')
     {
-        printf("Could not open file: %s\n", filename);
-        return 0;
+        if(str[i] == c)
+            last_pos = i;
+        i++;
     }
 
-    BlockAlloc alloc = create_block_alloc(1024);
+    return last_pos;
+}
 
-    AstStatement* root = parse(lexer, alloc);
-        
-    if( get_num_error() > 0 )
+int compile_program(const char* filename, std::vector<CompiledObj>* compiled_objects, const Settings& settings )
+{
+
+    std::unordered_set<unsigned long> compiled_files;
+    std::queue<const char*> compile_queue;
+
+    char filename_buffer[1024];
+    int last_slash = find_last_char(filename, '/');
+    int directory_size;
+    if(last_slash < 0)
     {
-        printf("\nCompilation failed with %d errors.\n", get_num_error());
-        return 0;
+        directory_size = 0;
+        compile_queue.push(filename);
+    }
+    else
+    {
+        directory_size = last_slash+1;
+        strncpy(filename_buffer, settings.filename, directory_size);
+        compile_queue.push(filename+directory_size);
     }
 
-    *code = compile(root);
 
-    dealloc(alloc);
-
-    if( get_num_error() > 0 )
+    while(compile_queue.size() > 0)
     {
-        printf("\nCompilation failed with %d errors.\n", get_num_error());
-        delete code->data;
-        return 0;
+        const char* filename = compile_queue.front();
+        strcpy(filename_buffer+directory_size, filename);
+
+        LexerContext lexer;
+        if(!create_lexer(&lexer, filename_buffer))
+        {
+            printf("Could not open file: %s\n", filename_buffer);
+            return 0;
+        }
+        printf("Comiling : %s\n", filename_buffer);
+
+        BlockAlloc alloc = create_block_alloc(1024);
+
+        AstStatement* root = parse(lexer, alloc);
+            
+        if( get_num_error() > 0 )
+        {
+            printf("\nCompilation failed with %d errors.\n", get_num_error());
+            return 0;
+        }
+        else if(settings.print_ast)
+            print_statement(root);
+
+        compiled_objects->push_back(compile(root));
+        CompiledObj& obj = compiled_objects->back();
+
+        dealloc(alloc);
+
+        if( get_num_error() > 0 )
+        {
+            printf("\nCompilation failed with %d errors.\n", get_num_error());
+            return 0;
+        }
+
+        compile_queue.pop();
+        compiled_files.insert(obj.filename_hash);
+
+        for(auto file : obj.dependent_files)
+        {
+            auto search = compiled_files.find(hash_djb2(file));
+            if(search == compiled_files.end())
+            {
+                compile_queue.push(file);
+            }
+        }
     }
 
     return 1;
@@ -76,6 +134,7 @@ int compile(const char* filename, ByteCode* code)
 int main(int argc, char** argv)
 {
     Settings settings = parse_cliargs(argc, argv);
+    settings.print_opcodes = true;
 
     if(settings.filename == nullptr)
     {
@@ -83,9 +142,19 @@ int main(int argc, char** argv)
         return 0;
     }
 
-    ByteCode code;
-    if(!compile(settings.filename, &code))
+    std::vector<CompiledObj> co;
+    if(!compile_program(settings.filename, &co, settings))
         return 0;
+
+    ByteCode code;
+    if(!link(co, &code))
+        return 0;
+        
+    if(settings.print_opcodes)
+    {
+        print_opcodes(code);
+        printf("------------\n");
+    }
 
     run(code);
     delete code.data;

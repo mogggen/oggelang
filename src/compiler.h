@@ -23,6 +23,17 @@ struct CompiledObj
     std::vector<const char*> dependent_files;
 };
 
-ByteCode compile(AstStatement* root);
+constexpr unsigned long hash_djb2(const char *str)
+{
+    unsigned long hash = 5381;
+    int c = 0;
+
+    while ((c = *str++))
+        hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
+
+    return hash;
+}
+
+CompiledObj compile(AstStatement* root);
 
 #endif

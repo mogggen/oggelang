@@ -3,16 +3,6 @@
 #include <algorithm>
 #include "error.h"
 
-constexpr unsigned long hash_djb2(const char *str)
-{
-    unsigned long hash = 5381;
-    int c = 0;
-
-    while ((c = *str++))
-        hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
-
-    return hash;
-}
 
 struct CompileCtx
 {
@@ -313,7 +303,7 @@ int compile_statement(CompileCtx& cc, AstStatement* stmt)
     return cc.program_data.size() - prev_size;
 }
 
-ByteCode compile(AstStatement* root)
+CompiledObj compile(AstStatement* root)
 {
     CompileCtx cc; 
     cc.filename_hash = hash_djb2(root->loc.filename);
@@ -326,28 +316,13 @@ ByteCode compile(AstStatement* root)
     }
 
 
-    for(auto g : cc.goto_addr)
-    {
-        auto it = cc.program_line_num.end();
-        while(it != cc.program_line_num.begin()) // can use a binary search here.
-        {
-            --it;
-            if(g.line_num <= it->line_num)
-                cc.program_data[g.addr] = it->addr;
-        }
-    }
-
-    for(auto a : cc.var_addr)
-        cc.program_data[a] += cc.program_data.size();
-
-    int size = cc.program_data.size() + cc.n_variables;
-    int* data = new int[size];
-
-    for(int i=0; i<cc.program_data.size(); i++)
-        data[i] = cc.program_data[i];
-    
-    for(int i=0; i<cc.n_variables; i++)
-        data[i + cc.program_data.size()] = 0;
-
-    return ByteCode{size, (int)cc.program_data.size(), data};
+    return CompiledObj{
+        cc.program_data,
+        cc.n_variables,
+        cc.var_addr,
+        cc.program_line_num,
+        cc.goto_addr,
+        cc.filename_hash,
+        cc.dependent_files
+    };
 }
