@@ -1,17 +1,5 @@
 var NEW_LINE = 10
-var i = 0
-var j = 0
-
-if j == 1 goto :8
-print i
-printc NEW_LINE
-i = ++i
-if i < 11 goto :4
- 
-j = 1
-var list = alloc
-var k = list
-@k = i
-@++k = alloc
+var A = 70
+print A
 
 goto other_file.ogge:1

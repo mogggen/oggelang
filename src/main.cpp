@@ -16,6 +16,7 @@ struct Settings
 {
     bool print_ast = false;
     bool print_opcodes = false;
+    bool run_program = true;
     const char* filename = nullptr;
 };
 
@@ -27,10 +28,12 @@ Settings parse_cliargs(int argc, char** argv)
     {
         if(*(argv+i)[0] == '-')
         {
-            if(strcmp(*(argv+i), "-print_ast") == 0)
+            if(strcmp(*(argv+i), "-print-ast") == 0)
                 settings.print_ast = true;
-            else if(strcmp(*(argv+i), "-print_opcodes") == 0)
+            else if(strcmp(*(argv+i), "-print-opcodes") == 0)
                 settings.print_opcodes = true;
+            else if(strcmp(*(argv+i), "-no-run") == 0)
+                settings.run_program = false;
             else
             {
                 printf("%s Is invalid flag.\n", *(argv+i));
@@ -78,6 +81,11 @@ int compile_program(const char* filename, std::vector<CompiledObj>* compiled_obj
         compile_queue.push(filename+directory_size);
     }
 
+    printf("directory: ");
+    for(int i = 0; i < directory_size; i++)
+        printf("%c", filename_buffer[i]);
+    printf("\n");
+
 
     while(compile_queue.size() > 0)
     {
@@ -85,12 +93,12 @@ int compile_program(const char* filename, std::vector<CompiledObj>* compiled_obj
         strcpy(filename_buffer+directory_size, filename);
 
         LexerContext lexer;
-        if(!create_lexer(&lexer, filename_buffer))
+        if(!create_lexer(&lexer, filename, filename_buffer))
         {
             printf("Could not open file: %s\n", filename_buffer);
             return 0;
         }
-        printf("Comiling : %s\n", filename_buffer);
+        printf("Compiling : %s\n", filename_buffer);
 
         BlockAlloc alloc = create_block_alloc(1024);
 
@@ -120,6 +128,7 @@ int compile_program(const char* filename, std::vector<CompiledObj>* compiled_obj
 
         for(auto file : obj.dependent_files)
         {
+            printf("file: %s\n", file);
             auto search = compiled_files.find(hash_djb2(file));
             if(search == compiled_files.end())
             {
@@ -135,6 +144,7 @@ int main(int argc, char** argv)
 {
     Settings settings = parse_cliargs(argc, argv);
     settings.print_opcodes = true;
+    settings.run_program = false;
 
     if(settings.filename == nullptr)
     {
@@ -156,7 +166,9 @@ int main(int argc, char** argv)
         printf("------------\n");
     }
 
-    run(code);
+    if(settings.run_program)
+        run(code);
+
     delete code.data;
 
     return 0;

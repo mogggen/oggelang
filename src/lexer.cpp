@@ -21,9 +21,9 @@ constexpr unsigned long hash_djb2(const char*str)
     return hash;
 }
 
-bool create_lexer(LexerContext* ctx, const char* filename)
+bool create_lexer(LexerContext* ctx, const char* filename, const char* path)
 {
-    ctx->file = fopen(filename, "r");
+    ctx->file = fopen(path, "r");
     if(ctx->file == nullptr)
         return false;
 

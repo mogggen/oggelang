@@ -58,7 +58,7 @@ struct LexerContext
     Token current_token;
 };
 
-bool create_lexer(LexerContext* ctx, const char* filename);
+bool create_lexer(LexerContext* ctx, const char* filename, const char* path);
 Token fetch_token(LexerContext& ctx);
 const Token& peek_token(LexerContext& ctx);
 void release_lexer(LexerContext& ctx);
