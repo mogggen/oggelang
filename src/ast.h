@@ -34,6 +34,7 @@ enum class ExpressionType
 
     ALLOC,
     CONSTANT,
+    LIST_ELEMENT,
 };
 
 struct AstExpression
@@ -47,6 +48,11 @@ struct AstExpression
             AstExpression* param_a;
             AstExpression* param_b;
         };
+        struct
+        {
+            AstExpression* list_element;
+            AstExpression* next_element;
+        };
         const char* var_name;
         int value;
     };
@@ -58,6 +64,7 @@ enum class StatementType
     IF,
     DECLARE,
     PRINT,
+    SCAN,
     ASSIGN,
     DERF_ASSIGN,
 };

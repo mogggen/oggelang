@@ -4,9 +4,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void report_runtime_errro(const char* msg)
+void report_runtime_errro(const char* msg, int pc)
 {
-    printf("RUNTIME ERROR: %s\n", msg);
+    printf("RUNTIME ERROR: %s at %d\n", msg, pc);
 }
 
 struct Stack
@@ -127,7 +127,7 @@ void run(ByteCode code)
                         case CmpTypes::GREATER_EQUAL: push(stack, a >= b ? 1 : 0 ); break;
                         case CmpTypes::LESS:          push(stack, a <  b ? 1 : 0 ); break;
                         case CmpTypes::GREATER:       push(stack, a >  b ? 1 : 0 ); break;
-                        default: report_runtime_errro("Compare error."); return;
+                        default: report_runtime_errro("Compare error.", pc-2); return;
                     }
                 } break;
 
@@ -181,6 +181,18 @@ void run(ByteCode code)
             case OpCode::PRINTC:
                 {
                     printf("%c", (char)pop(stack));
+                } break;
+            case OpCode::SCAN:
+                {
+                    int v;
+                    int a = pop(stack);
+                    scanf("%d", &v);
+                    SET(a, v);
+                } break;
+
+            case OpCode::END:
+                {
+                    pc = code.code_size; // jump to end
                 } break;
         }
     }
@@ -240,6 +252,8 @@ void print_opcodes(ByteCode code)
             case OpCode::IF:        printf("IF %d\n", code.data[pc++]); break;
             case OpCode::PRINT:     printf("PRINT\n"); break;
             case OpCode::PRINTC:    printf("PRINTC\n"); break;
+            case OpCode::SCAN:    printf("SCAN\n"); break;
+            case OpCode::END:       printf("END\n"); break;
         }
     }
 }

@@ -2,6 +2,7 @@ bin
 build
 .vs
 .clangd
+.proj.vim
 linux_build
 out
 compile_commands.json

@@ -92,6 +92,11 @@ AstExpression* parse_single_expression(LexerContext& lexer, BlockAlloc& alloc)
                     expr->type = ExpressionType::DERF;
                     expr->param_a = e;
                 }
+                else if(e->type == ExpressionType::LIST_ELEMENT)
+                {
+                    report_error("Cannot dereference a list.", e->loc);
+                    return nullptr;
+                }
                 else
                 {
                     report_error("Expected a variable here.", e->loc);
@@ -112,6 +117,11 @@ AstExpression* parse_single_expression(LexerContext& lexer, BlockAlloc& alloc)
                     expr = (AstExpression*)allocate(alloc, sizeof(AstExpression));
                     expr->type = ExpressionType::NOT;
                     expr->param_a = e;
+                }
+                else if(e->type == ExpressionType::LIST_ELEMENT)
+                {
+                    report_error("Cannot not a list.", e->loc);
+                    return nullptr;
                 }
                 else
                 {
@@ -136,6 +146,11 @@ AstExpression* parse_single_expression(LexerContext& lexer, BlockAlloc& alloc)
                     if(is_double_arg_expression(e))
                     {
                         report_error("Expected a Variable or constant.", e->loc);
+                        return nullptr;
+                    }
+                    else if(e->type == ExpressionType::LIST_ELEMENT)
+                    {
+                        report_error("Cannot increment a list.", e->loc);
                         return nullptr;
                     }
 
@@ -166,6 +181,11 @@ AstExpression* parse_single_expression(LexerContext& lexer, BlockAlloc& alloc)
                         report_error("Expected a Variable or constant.", e->loc);
                         return nullptr;
                     }
+                    else if(e->type == ExpressionType::LIST_ELEMENT)
+                    {
+                        report_error("Cannot decrement a list.", e->loc);
+                        return nullptr;
+                    }
 
                     expr = (AstExpression*)allocate(alloc, sizeof(AstExpression));
                     expr->type = ExpressionType::DECREASE;
@@ -183,6 +203,11 @@ AstExpression* parse_single_expression(LexerContext& lexer, BlockAlloc& alloc)
                     if(is_double_arg_expression(e))
                     {
                         report_error("Expected a Variable or constant.", e->loc);
+                        return nullptr;
+                    }
+                    else if(e->type == ExpressionType::LIST_ELEMENT)
+                    {
+                        report_error("Cannot negate a list.", e->loc);
                         return nullptr;
                     }
 
@@ -208,6 +233,11 @@ AstExpression* parse_single_expression(LexerContext& lexer, BlockAlloc& alloc)
                         expr = (AstExpression*)allocate(alloc, sizeof(AstExpression));
                         expr->type = ExpressionType::LSHIFT;
                         expr->param_a = e;
+                    }
+                    else if(e->type == ExpressionType::LIST_ELEMENT)
+                    {
+                        report_error("Cannot shift a list.", e->loc);
+                        return nullptr;
                     }
                     else
                     {
@@ -240,6 +270,11 @@ AstExpression* parse_single_expression(LexerContext& lexer, BlockAlloc& alloc)
                         expr->type = ExpressionType::RSHIFT;
                         expr->param_a = e;
                     }
+                    else if(e->type == ExpressionType::LIST_ELEMENT)
+                    {
+                        report_error("Cannot shift a list.", e->loc);
+                        return nullptr;
+                    }
                     else
                     {
                         report_error("Expected a Variable or constant.", e->loc);
@@ -252,6 +287,39 @@ AstExpression* parse_single_expression(LexerContext& lexer, BlockAlloc& alloc)
                     report_error("Unexpected symbol.", t.loc);
                     return nullptr;
                 }
+            } break;
+        case TokenType::LIST_BEGIN:
+            {
+                AstExpression* first = nullptr;
+                AstExpression* prev = nullptr;
+                AstExpression* current = nullptr;
+                while(peek_token(lexer).type != TokenType::LIST_END) 
+                {
+                    current = (AstExpression*)allocate(alloc, sizeof(AstExpression));
+                    current->type = ExpressionType::LIST_ELEMENT;
+                    AstExpression* element = parse_expression(lexer, alloc);
+                    if(element == nullptr)
+                    {
+                        first = nullptr;
+                        break;
+                    }
+                    current->list_element = element;
+                    current->next_element = nullptr;
+
+                    if(first == nullptr)
+                    {
+                        first = current;
+                        prev = first;
+                    }
+                    else
+                    {
+                        prev->next_element = current;
+                        prev = current;
+                    }
+                }
+                fetch_token(lexer);
+                expr = first;
+
             } break;
         default:
             { 
@@ -348,6 +416,12 @@ AstExpression* parse_operator_expression(LexerContext& lexer, BlockAlloc& alloc,
     AstExpression* right_expr = parse_expression(lexer, alloc);
     if(right_expr == nullptr)
     {
+        return nullptr;
+    }
+
+    if(right_expr->type == ExpressionType::LIST_ELEMENT || left_expr->type == ExpressionType::LIST_ELEMENT)
+    {
+        report_error("Cannot operate on list.", t.loc);
         return nullptr;
     }
 
@@ -519,6 +593,21 @@ AstStatement* parse_statement(LexerContext& lexer, BlockAlloc& alloc)
                     new_statement->type = StatementType::PRINT;
                     new_statement->expression = expression;
                     new_statement->print_as_char = true;
+                }
+                else
+                    break;
+                Token t = fetch_token(lexer);
+                if(t.type != TokenType::NEW_LINE)
+                    report_error("Unexpected symbol.", t.loc);
+            } break;
+        case TokenType::SCAN:
+            {
+                AstExpression* expression = parse_expression(lexer, alloc);
+                if(expression != nullptr)
+                {
+                    new_statement = (AstStatement*)allocate(alloc, sizeof(AstStatement));
+                    new_statement->type = StatementType::SCAN;
+                    new_statement->expression = expression;
                 }
                 else
                     break;

@@ -10,6 +10,7 @@
 #define  ALLOC_STRING "alloc"
 #define  PRINT_STRING "print"
 #define  PRINTC_STRING "printc"
+#define  SCAN_STRING "scan"
 
 constexpr unsigned long hash_djb2(const char*str)
 {
@@ -48,8 +49,8 @@ bool is_token(char c)
         case TokenType::NOT:
         case TokenType::DERF:
         case TokenType::ASSIGN:
-        case TokenType::ARRAY_BEGIN:
-        case TokenType::ARRAY_END:
+        case TokenType::LIST_BEGIN:
+        case TokenType::LIST_END:
         case TokenType::COLON:
         case TokenType::LESS:
         case TokenType::GREATER:
@@ -180,6 +181,7 @@ Token fetch_token(LexerContext& ctx)
             case hash_djb2(ALLOC_STRING):   new_token.type = TokenType::ALLOC;  break;
             case hash_djb2(PRINT_STRING):   new_token.type = TokenType::PRINT;  break;
             case hash_djb2(PRINTC_STRING):  new_token.type = TokenType::PRINTC; break;
+            case hash_djb2(SCAN_STRING):    new_token.type = TokenType::SCAN; break;
             default:
             {
                 if( is_number(buf[0]) )         
@@ -240,6 +242,7 @@ void print_token(Token t)
         case TokenType::ALLOC: printf("ALLOC\n"); break;
         case TokenType::PRINT: printf("PRINT\n"); break;
         case TokenType::PRINTC: printf("PRINTC\n"); break;
+        case TokenType::SCAN: printf("SCAN\n"); break;
         case TokenType::IDENTIFIER: printf("IDENTIFIER: %s\n", t.data); break;
         case TokenType::CONSTANT: printf("CONSTANT: %d\n", t.value); break;
         case TokenType::NO_TOKEN: printf("NO_TOKEN\n"); break;

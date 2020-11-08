@@ -203,6 +203,10 @@ bool compile_expression(CompileCtx& cc, AstExpression* expr)
             {
                 cc.program_data.push_back((int)OpCode::ALLOC);
             } break;
+        case ExpressionType::LIST_ELEMENT:
+            {
+                cc.program_data.push_back((int)OpCode::ALLOC);
+            } break;
         default:
             return false;
     }
@@ -298,6 +302,14 @@ int compile_statement(CompileCtx& cc, AstStatement* stmt)
                     cc.program_line_num.push_back({beginning_addr, cc.filename_hash, stmt->loc.line});
                 }
             } break;
+        case StatementType::SCAN:
+            {
+                if(compile_expression(cc, stmt->expression))
+                {
+                    cc.program_data.push_back((int)OpCode::SCAN);
+                    cc.program_line_num.push_back({beginning_addr, cc.filename_hash, stmt->loc.line});
+                }
+            } break;
     }
 
     return cc.program_data.size() - prev_size;
@@ -314,6 +326,8 @@ CompiledObj compile(AstStatement* root)
         compile_statement(cc, statement);
         statement = statement->next;
     }
+
+    cc.program_data.push_back((int)OpCode::END);
 
 
     return CompiledObj{

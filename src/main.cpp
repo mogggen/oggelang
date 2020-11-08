@@ -17,7 +17,7 @@ struct Settings
     bool print_ast = false;
     bool print_opcodes = false;
     bool run_program = true;
-    const char* filename = nullptr;
+    char* filename = nullptr;
 };
 
 Settings parse_cliargs(int argc, char** argv)
@@ -60,6 +60,16 @@ int find_last_char(const char* str, char c)
     return last_pos;
 }
 
+void convert_to_unix_file_path(char* path)
+{
+    while(*path != '\0')
+    {
+        if(*path == '\\')
+            *path = '/';
+        path++;
+    }
+}
+
 int compile_program(const char* filename, std::vector<CompiledObj>* compiled_objects, const Settings& settings )
 {
 
@@ -80,11 +90,6 @@ int compile_program(const char* filename, std::vector<CompiledObj>* compiled_obj
         strncpy(filename_buffer, settings.filename, directory_size);
         compile_queue.push(filename+directory_size);
     }
-
-    printf("directory: ");
-    for(int i = 0; i < directory_size; i++)
-        printf("%c", filename_buffer[i]);
-    printf("\n");
 
 
     while(compile_queue.size() > 0)
@@ -128,7 +133,6 @@ int compile_program(const char* filename, std::vector<CompiledObj>* compiled_obj
 
         for(auto file : obj.dependent_files)
         {
-            printf("file: %s\n", file);
             auto search = compiled_files.find(hash_djb2(file));
             if(search == compiled_files.end())
             {
@@ -143,6 +147,7 @@ int compile_program(const char* filename, std::vector<CompiledObj>* compiled_obj
 int main(int argc, char** argv)
 {
     Settings settings = parse_cliargs(argc, argv);
+    settings.print_ast = true;
     settings.print_opcodes = true;
     settings.run_program = false;
 
@@ -151,6 +156,10 @@ int main(int argc, char** argv)
         printf("No filename specified.\n");
         return 0;
     }
+
+#ifdef WIN32
+    convert_to_unix_file_path(settings.filename);
+#endif
 
     std::vector<CompiledObj> co;
     if(!compile_program(settings.filename, &co, settings))
@@ -169,7 +178,7 @@ int main(int argc, char** argv)
     if(settings.run_program)
         run(code);
 
-    delete code.data;
+    free(code.data);
 
     return 0;
 }

@@ -17,8 +17,8 @@ enum class TokenType
     REF = '*',
     DERF = '@',
     ASSIGN = '=',
-    ARRAY_BEGIN = '[',
-    ARRAY_END = ']',
+    LIST_BEGIN = '[',
+    LIST_END = ']',
     EQUALS = '=',
     COLON = ':',
     LESS = '<',
@@ -36,6 +36,7 @@ enum class TokenType
     ALLOC,
     PRINT,
     PRINTC,
+    SCAN,
 
     IDENTIFIER,
     CONSTANT,

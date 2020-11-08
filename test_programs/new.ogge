@@ -1,5 +1,12 @@
 var NEW_LINE = 10
 var A = 70
 print A
+printc NEW_LINE
 
 goto other_file.ogge:1
+
+var B = 20
+printc NEW_LINE
+print B
+
+var L = [1 2 3 4]

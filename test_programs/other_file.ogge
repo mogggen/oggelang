@@ -1,2 +1,3 @@
 var C = 42
 print C
+goto new.ogge:8

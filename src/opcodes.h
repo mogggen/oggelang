@@ -29,6 +29,9 @@ enum class OpCode
     IF,
     PRINT,
     PRINTC,
+    SCAN,
+
+    END,
 };
 
 enum class CmpTypes

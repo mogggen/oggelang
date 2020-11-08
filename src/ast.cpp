@@ -140,6 +140,13 @@ void print_expression(AstExpression* expr, int indent)
             {
                 printf("CONSTANT %d\n", expr->value);
             } break;
+        case ExpressionType::LIST_ELEMENT:
+            {
+                printf("LIST_ELEMENT\n");
+                print_expression(expr->list_element, indent+2);
+                if(expr->next_element != nullptr)
+                    print_expression(expr->next_element, indent);
+            } break;
     }
 }
 
@@ -173,6 +180,11 @@ void print_statement(AstStatement* stmt, int indent)
                     printf("PRINT as char\n");
                 else
                     printf("PRINT as int\n");
+                print_expression(stmt->expression, indent+2);
+            } break;
+        case StatementType::SCAN: 
+            {
+                printf("SCAN\n");
                 print_expression(stmt->expression, indent+2);
             } break;
         case StatementType::ASSIGN: 
