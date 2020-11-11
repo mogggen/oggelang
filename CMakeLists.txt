@@ -1,23 +1,14 @@
 cmake_minimum_required( VERSION 3.8 )
 
-project( ogge )
+project( oggelang )
 
 set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin )
 set( CMAKE_EXPORT_COMPILE_COMMANDS ON )
 
-set( src_dir ${CMAKE_CURRENT_SOURCE_DIR}/src )
+set( include_dirs ${CMAKE_SOURCE_DIR}/compiler/src ${CMAKE_SOURCE_DIR}/interpreter/src )
 
-add_executable( ogge 
-    ${src_dir}/main.cpp
-    ${src_dir}/block_alloc.cpp
-    ${src_dir}/ast.cpp
-    ${src_dir}/error.cpp
-    ${src_dir}/lexer.cpp
-    ${src_dir}/parser.cpp
-    ${src_dir}/compiler.cpp
-    ${src_dir}/linker.cpp
-    ${src_dir}/interpreter.cpp
-)
+add_subdirectory(compiler)
+add_subdirectory(interpreter)
 
-set_property(TARGET ogge PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
-
+add_subdirectory(gui)
+add_subdirectory(main)

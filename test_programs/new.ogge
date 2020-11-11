@@ -8,5 +8,19 @@ goto other_file.ogge:1
 var B = 20
 printc NEW_LINE
 print B
+printc NEW_LINE
 
 var L = [1 2 3 4]
+
+var i = @L
+print i
+printc NEW_LINE
+i = @++i
+print i
+printc NEW_LINE
+i = @++i
+print i
+printc NEW_LINE
+i = @++i
+print i
+
