@@ -8,18 +8,19 @@ struct Character
 {
     bool is_valid = false;
     SDL_Texture* texture = nullptr;
-    int width, height;
+    int width,height;
+    int top, left;
     int advance;
 };
 
 struct Font
 {
-    const char* name;
+    const char* filename;
     Character characters[256];
 };
 
 bool init_fonts();
 bool create_font(Font* font, SDL_Renderer* renderer, const char* filename);
-void render_text(SDL_Renderer* renderer, Font* font, const char* text);
+void render_text(SDL_Renderer* renderer, Font* font, const char* text, int x, int y);
 
 #endif

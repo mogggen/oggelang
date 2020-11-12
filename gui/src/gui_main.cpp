@@ -6,6 +6,7 @@
 #include "font.h"
 
 
+
 int gui_main()
 {
     SDL_Window* window;
@@ -27,22 +28,21 @@ int gui_main()
 
     SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, 0);
 
-    init_fonts();
+    if(!init_fonts())
+        return 1;
 
     Font font;
-    create_font(&font, renderer, "CallingCode-Regular.ttf");
+    if(!create_font(&font, renderer, "ArialCEBold.ttf"))
+        return 1;
 
-
+    SDL_SetHint( SDL_HINT_RENDER_SCALE_QUALITY, "0" );
     SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
-    SDL_SetRenderDrawColor(renderer, 0,0,0,0);
+    SDL_SetRenderDrawColor(renderer, 40,40,40,0);
     SDL_RenderClear(renderer);
+
+    render_text(renderer, &font, "H", 11, 50);
+
     SDL_SetRenderDrawColor(renderer, 255,0,0,0);
-
-
-
-    render_text(renderer, &font, "Hello there!");
-
-
     SDL_RenderDrawPoint(renderer, 1, 1);
 
 
@@ -57,6 +57,13 @@ int gui_main()
         switch(event.type)
         {
             case SDL_QUIT: running = false; break;
+            case SDL_KEYDOWN:
+               {
+                   switch(event.key.keysym.sym)
+                   {
+                       case SDLK_ESCAPE: running = false; break;
+                   }
+               }
         }
     }
     

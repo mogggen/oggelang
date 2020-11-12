@@ -27,12 +27,12 @@ bool init_fonts()
 
 bool create_font(Font* font, SDL_Renderer* renderer, const char* filename)
 {
-
     FT_Face face;
 
     int error;
 
-    error = FT_New_Face( library, "CallingCode-Regular.ttf", 0, &face );
+    error = FT_New_Face( library, filename, 0, &face );
+    font->filename = filename;
 
     if(error)
     {
@@ -40,8 +40,8 @@ bool create_font(Font* font, SDL_Renderer* renderer, const char* filename)
         return false;
     }
 
-    error = FT_Set_Char_Size( face, 0, 16*64, 300, 300 );
-    error = FT_Set_Pixel_Sizes( face, 0, 32 );
+    error = FT_Set_Char_Size( face, 0, 1*64, 30, 30 );
+    error = FT_Set_Pixel_Sizes( face, 0, 12 );
 
     int loaded_chars = 0;
 
@@ -68,14 +68,7 @@ bool create_font(Font* font, SDL_Renderer* renderer, const char* filename)
         if(width != 0 && rows != 0)
         {
             SDL_Texture* texture;
-            SDL_Surface* surface = SDL_CreateRGBSurfaceFrom(face->glyph->bitmap.buffer,
-                    width, rows,
-                    8,
-                    face->glyph->bitmap.pitch,
-                    0x00000000, 0x00000000, 0x00000000, 0x000000ff);
-            //format);
-
-
+            SDL_Surface* surface = SDL_CreateRGBSurfaceFrom(face->glyph->bitmap.buffer, width, rows, 8, face->glyph->bitmap.pitch, 0, 0, 0, 0xff); 
 
             SDL_SetPaletteColors(surface->format->palette, colors_white, 0, 256);
 
@@ -99,6 +92,8 @@ bool create_font(Font* font, SDL_Renderer* renderer, const char* filename)
         character->is_valid = true;
         character->width = width;
         character->height = rows;
+        character->top = face->glyph->bitmap_top;
+        character->left = face->glyph->bitmap_left;
         character->advance = face->glyph->advance.x/64;
 
         loaded_chars++;
@@ -108,9 +103,11 @@ bool create_font(Font* font, SDL_Renderer* renderer, const char* filename)
     return true;
 }
 
-void render_text(SDL_Renderer* renderer, Font* font, const char* text)
+void render_text(SDL_Renderer* renderer, Font* font, const char* text, int x, int y)
 {
-    int x_offset = 0;
+    int x_pos = x;
+    int y_pos = y;
+
     while(*text != '\0')
     {
         Character* character = font->characters+*text;
@@ -120,15 +117,16 @@ void render_text(SDL_Renderer* renderer, Font* font, const char* text)
         if(character->texture != nullptr)
         {
             SDL_Rect texture_rect;
-            texture_rect.x = x_offset;
-            texture_rect.y = 0;
-            texture_rect.w = character->width;
-            texture_rect.h = character->height;
+            texture_rect.x = x_pos + character->left;
+            texture_rect.y = y_pos - character->top;
+            texture_rect.w = character->width*10;
+            texture_rect.h = character->height*10;
 
+            SDL_SetTextureColorMod(character->texture, 251, 241, 199);
             SDL_RenderCopy(renderer, character->texture, nullptr, &texture_rect);
         }
 
-        x_offset += character->advance;
+        x_pos += character->advance;
         text++;
     }
 }
