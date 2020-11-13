@@ -8,6 +8,8 @@ add_library( gui
     src/gui_main.cpp
     src/stb_image.cpp
     src/font.cpp
+    src/window.cpp
+    src/buttons.cpp
 )
 
 file( COPY ${CMAKE_CURRENT_SOURCE_DIR}/deps/SDL2-2.0.12/lib/x64/SDL2.dll 

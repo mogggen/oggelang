@@ -33,6 +33,7 @@ bool create_font(Font* font, Window* window, const char* filename)
 
     error = FT_New_Face( library, filename, 0, &face );
     font->filename = filename;
+    font->size = 12;
 
     if(error)
     {
@@ -41,7 +42,7 @@ bool create_font(Font* font, Window* window, const char* filename)
     }
 
     error = FT_Set_Char_Size( face, 0, 64*64, 30, 30 );
-    error = FT_Set_Pixel_Sizes( face, 0, 12 );
+    error = FT_Set_Pixel_Sizes( face, 0, font->size );
 
     int loaded_chars = 0;
 
@@ -103,10 +104,10 @@ bool create_font(Font* font, Window* window, const char* filename)
     return true;
 }
 
-void render_text(Window* window, Font* font, const char* text, int x, int y)
+void draw_text(Window* window, Font* font, const char* text, Point pos)
 {
-    int x_pos = x;
-    int y_pos = y;
+    int x_pos = pos.x;
+    int y_pos = pos.y;
 
     while(*text != '\0')
     {
@@ -129,4 +130,34 @@ void render_text(Window* window, Font* font, const char* text, int x, int y)
         x_pos += character->advance;
         text++;
     }
+}
+
+void get_text_size(Font* font, const char* text, int* out_width, int* out_height)
+{
+    int widht = 0;
+    int top = 0;
+    int bottom = 9000; // Just a big number, not the best way to do things
+
+    int last_width = 0;
+
+    while(*text != '\0')
+    {
+        Character* character = font->characters+*text;
+
+        if(!character->is_valid)
+            continue;
+
+        last_width = character->left + character->width;
+        widht += character->advance;
+
+        if(character->top > top) top = character->top;
+
+        int b = character->top - character->height;
+        if( b < bottom ) bottom = b;
+
+        text++;
+    }
+
+    *out_width = widht;
+    *out_height = bottom - top;
 }

@@ -4,9 +4,14 @@
 #include "SDL.h"
 #include "stb_image.h"
 #include "window.h"
+#include "buttons.h"
 #include "font.h"
 
 
+void button_callback(void* data)
+{
+    printf("button is clicked %d\n", *(int*)data);
+}
 
 int gui_main()
 {
@@ -15,7 +20,7 @@ int gui_main()
     SDL_Init(SDL_INIT_VIDEO);
 
     window.window = SDL_CreateWindow(
-            "Hello there",
+            "OggeLang",
             SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,
             800,600,
             SDL_WINDOW_RESIZABLE
@@ -36,22 +41,56 @@ int gui_main()
     if(!create_font(&font, &window, "ArialCEBold.ttf"))
         return 1;
 
-    SDL_SetHint( SDL_HINT_RENDER_SCALE_QUALITY, "0" );
+    SDL_SetHint( SDL_HINT_RENDER_SCALE_QUALITY, "1" );
+
+
     SDL_SetRenderDrawBlendMode(window.renderer, SDL_BLENDMODE_BLEND);
-    SDL_SetRenderDrawColor(window.renderer, 40,40,40,0);
-    SDL_RenderClear(window.renderer);
 
-    render_text(&window, &font, "Hello there!", 11, 50);
+    ButtonGroup buttons = {&font};
 
-    SDL_SetRenderDrawColor(window.renderer, 255,0,0,0);
-    SDL_RenderDrawPoint(window.renderer, 1, 1);
+    int button_int = 6;
+    Button b = {
+        2, 24, 2, 100,
+        "I'm a button.",
+        button_callback,
+        &button_int,
+    };
+    add_button(&buttons, b);
+    int button_int2 = 9;
+    Button b2 = {
+        2, 24, 103, 204,
+        "I'm a button too.",
+        button_callback,
+        &button_int2,
+    };
+    add_button(&buttons, b2);
 
+    int tex_width, tex_height, tex_channels;
+    unsigned char* data = stbi_load("run.png", &tex_width, &tex_height, &tex_channels, STBI_rgb_alpha);
+    
+    SDL_Texture* texture;
+    SDL_Surface* surface = SDL_CreateRGBSurfaceFrom(data, tex_width, tex_height, 32, 4*tex_width, 0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000);
+
+    texture = SDL_CreateTextureFromSurface(window.renderer, surface);
+    SDL_Rect texture_rect;
+    texture_rect.x = 2;
+    texture_rect.y = 2;
+    texture_rect.w = tex_width;
+    texture_rect.h = tex_height;
+
+    stbi_image_free(data);
 
     SDL_Event event;
     bool running = true;
 
     while(running)
     {
+        SDL_SetRenderDrawColor(window.renderer, 40,40,40,0);
+        SDL_RenderClear(window.renderer);
+
+        draw_buttons(&buttons, &window);
+        SDL_RenderCopy(window.renderer, texture, nullptr, &texture_rect);
+
         SDL_RenderPresent(window.renderer);
         SDL_WaitEvent(&event);
 
@@ -65,7 +104,22 @@ int gui_main()
                        case SDLK_ESCAPE: running = false; break;
                    }
                }
+            case SDL_MOUSEBUTTONDOWN:
+               {
+                   Point p = {event.button.x, event.button.y};
+                   switch(event.button.button)
+                   {
+                       case SDL_BUTTON_LEFT: check_click(&buttons, p); break;
+                   }
+               }
+            case SDL_MOUSEMOTION:
+               {
+                   Point p = {event.button.x, event.button.y};
+                   check_enter(&buttons, p);
+               }
         }
+
+
     }
     
     SDL_DestroyRenderer(window.renderer);
@@ -76,18 +130,4 @@ int gui_main()
 }
 
 /*
-    int tex_width, tex_height, tex_channels;
-    unsigned char* data = stbi_load("piston.png", &tex_width, &tex_height, &tex_channels, STBI_rgb_alpha);
-    
-    SDL_Texture* texture;
-    SDL_Surface* surface = SDL_CreateRGBSurfaceFrom(data, tex_width, tex_height, 32, 4*tex_width, 0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000);
-
-    texture = SDL_CreateTextureFromSurface(renderer, surface);
-    SDL_Rect texture_rect;
-    texture_rect.x = 0;
-    texture_rect.y = 0;
-    texture_rect.w = 150;
-    texture_rect.h = 50;
-
-    stbi_image_free(data);
 */
