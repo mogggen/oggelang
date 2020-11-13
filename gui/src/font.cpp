@@ -25,7 +25,7 @@ bool init_fonts()
     return true;
 }
 
-bool create_font(Font* font, SDL_Renderer* renderer, const char* filename)
+bool create_font(Font* font, Window* window, const char* filename)
 {
     FT_Face face;
 
@@ -40,7 +40,7 @@ bool create_font(Font* font, SDL_Renderer* renderer, const char* filename)
         return false;
     }
 
-    error = FT_Set_Char_Size( face, 0, 1*64, 30, 30 );
+    error = FT_Set_Char_Size( face, 0, 64*64, 30, 30 );
     error = FT_Set_Pixel_Sizes( face, 0, 12 );
 
     int loaded_chars = 0;
@@ -78,7 +78,7 @@ bool create_font(Font* font, SDL_Renderer* renderer, const char* filename)
                 continue;
             }
 
-            texture = SDL_CreateTextureFromSurface(renderer, surface);
+            texture = SDL_CreateTextureFromSurface(window->renderer, surface);
             if(texture == nullptr)
             {
                 printf("Failed create texture. %s\n", SDL_GetError());
@@ -103,7 +103,7 @@ bool create_font(Font* font, SDL_Renderer* renderer, const char* filename)
     return true;
 }
 
-void render_text(SDL_Renderer* renderer, Font* font, const char* text, int x, int y)
+void render_text(Window* window, Font* font, const char* text, int x, int y)
 {
     int x_pos = x;
     int y_pos = y;
@@ -119,11 +119,11 @@ void render_text(SDL_Renderer* renderer, Font* font, const char* text, int x, in
             SDL_Rect texture_rect;
             texture_rect.x = x_pos + character->left;
             texture_rect.y = y_pos - character->top;
-            texture_rect.w = character->width*10;
-            texture_rect.h = character->height*10;
+            texture_rect.w = character->width;
+            texture_rect.h = character->height;
 
             SDL_SetTextureColorMod(character->texture, 251, 241, 199);
-            SDL_RenderCopy(renderer, character->texture, nullptr, &texture_rect);
+            SDL_RenderCopy(window->renderer, character->texture, nullptr, &texture_rect);
         }
 
         x_pos += character->advance;

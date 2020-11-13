@@ -3,6 +3,7 @@
 
 #include <unordered_map>
 #include "SDL.h"
+#include "window.h"
 
 struct Character
 {
@@ -20,7 +21,7 @@ struct Font
 };
 
 bool init_fonts();
-bool create_font(Font* font, SDL_Renderer* renderer, const char* filename);
-void render_text(SDL_Renderer* renderer, Font* font, const char* text, int x, int y);
+bool create_font(Font* font, Window* window, const char* filename);
+void render_text(Window* window, Font* font, const char* text, int x, int y);
 
 #endif

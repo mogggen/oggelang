@@ -3,47 +3,48 @@
 #include <stdio.h>
 #include "SDL.h"
 #include "stb_image.h"
+#include "window.h"
 #include "font.h"
 
 
 
 int gui_main()
 {
-    SDL_Window* window;
+    Window window;
 
     SDL_Init(SDL_INIT_VIDEO);
 
-    window = SDL_CreateWindow(
+    window.window = SDL_CreateWindow(
             "Hello there",
             SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,
             800,600,
             SDL_WINDOW_RESIZABLE
             );
 
-    if(window == nullptr)
+    if(window.window == nullptr)
     {
         printf("Failed to open window. %s\n", SDL_GetError());
         return 0;
     }
 
-    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, 0);
+    window.renderer = SDL_CreateRenderer(window.window, -1, 0);
 
     if(!init_fonts())
         return 1;
 
     Font font;
-    if(!create_font(&font, renderer, "ArialCEBold.ttf"))
+    if(!create_font(&font, &window, "ArialCEBold.ttf"))
         return 1;
 
     SDL_SetHint( SDL_HINT_RENDER_SCALE_QUALITY, "0" );
-    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
-    SDL_SetRenderDrawColor(renderer, 40,40,40,0);
-    SDL_RenderClear(renderer);
+    SDL_SetRenderDrawBlendMode(window.renderer, SDL_BLENDMODE_BLEND);
+    SDL_SetRenderDrawColor(window.renderer, 40,40,40,0);
+    SDL_RenderClear(window.renderer);
 
-    render_text(renderer, &font, "H", 11, 50);
+    render_text(&window, &font, "Hello there!", 11, 50);
 
-    SDL_SetRenderDrawColor(renderer, 255,0,0,0);
-    SDL_RenderDrawPoint(renderer, 1, 1);
+    SDL_SetRenderDrawColor(window.renderer, 255,0,0,0);
+    SDL_RenderDrawPoint(window.renderer, 1, 1);
 
 
     SDL_Event event;
@@ -51,7 +52,7 @@ int gui_main()
 
     while(running)
     {
-        SDL_RenderPresent(renderer);
+        SDL_RenderPresent(window.renderer);
         SDL_WaitEvent(&event);
 
         switch(event.type)
@@ -67,8 +68,8 @@ int gui_main()
         }
     }
     
-    SDL_DestroyRenderer(renderer);
-    SDL_DestroyWindow(window);
+    SDL_DestroyRenderer(window.renderer);
+    SDL_DestroyWindow(window.window);
     SDL_Quit();
 
     return 0;
