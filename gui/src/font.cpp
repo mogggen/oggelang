@@ -25,7 +25,7 @@ bool init_fonts()
     return true;
 }
 
-bool create_font(Font* font, Window* window, const char* filename)
+bool create_font(Font* font, Window* window, const char* filename, int size)
 {
     FT_Face face;
 
@@ -33,7 +33,7 @@ bool create_font(Font* font, Window* window, const char* filename)
 
     error = FT_New_Face( library, filename, 0, &face );
     font->filename = filename;
-    font->size = 12;
+    font->size = size;
 
     if(error)
     {
@@ -41,7 +41,7 @@ bool create_font(Font* font, Window* window, const char* filename)
         return false;
     }
 
-    error = FT_Set_Char_Size( face, 0, 64*64, 30, 30 );
+    error = FT_Set_Char_Size( face, 0, 64*64, 3000, 3000 );
     error = FT_Set_Pixel_Sizes( face, 0, font->size );
 
     int loaded_chars = 0;
@@ -106,14 +106,22 @@ bool create_font(Font* font, Window* window, const char* filename)
 
 void draw_text(Window* window, Font* font, const char* text, Point pos)
 {
+    draw_text(window, font, text, pos, '\0', COLOR_LIGHT);
+}
+
+void draw_text(Window* window, Font* font, const char* text, Point pos, char end_char, Color color)
+{
     int x_pos = pos.x;
     int y_pos = pos.y;
 
-    while(*text != '\0')
+    while(*text != '\0' && *text != end_char)
     {
         Character* character = font->characters+*text;
         if(!character->is_valid)
+        {
+            text++;
             continue;
+        }
 
         if(character->texture != nullptr)
         {
@@ -123,7 +131,7 @@ void draw_text(Window* window, Font* font, const char* text, Point pos)
             texture_rect.w = character->width;
             texture_rect.h = character->height;
 
-            SDL_SetTextureColorMod(character->texture, 251, 241, 199);
+            SDL_SetTextureColorMod(character->texture, color.r, color.g, color.b);
             SDL_RenderCopy(window->renderer, character->texture, nullptr, &texture_rect);
         }
 
@@ -159,5 +167,5 @@ void get_text_size(Font* font, const char* text, int* out_width, int* out_height
     }
 
     *out_width = widht;
-    *out_height = bottom - top;
+    *out_height = top - bottom;
 }

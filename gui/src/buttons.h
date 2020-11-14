@@ -24,7 +24,13 @@ struct ButtonGroup
     std::vector<Button> buttons;
 };
 
-void add_button(ButtonGroup* group, Button b);
+Button* new_button(ButtonGroup* group,
+        const char* text,
+        Point pos,
+        int width, int height,
+        void (*click_callback)(void*),
+        void* callback_data);
+
 void draw_buttons(ButtonGroup* group, Window* window);
 void check_click(ButtonGroup* group, Point p);
 void check_enter(ButtonGroup* group, Point p);

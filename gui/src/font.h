@@ -22,8 +22,9 @@ struct Font
 };
 
 bool init_fonts();
-bool create_font(Font* font, Window* window, const char* filename);
+bool create_font(Font* font, Window* window, const char* filename, int size);
 void draw_text(Window* window, Font* font, const char* text, Point pos);
+void draw_text(Window* window, Font* font, const char* text, Point pos, char end_char, Color color);
 void get_text_size(Font* font, const char* text, int* out_width, int* out_height);
 
 #endif

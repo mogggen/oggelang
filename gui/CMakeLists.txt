@@ -10,6 +10,8 @@ add_library( gui
     src/font.cpp
     src/window.cpp
     src/buttons.cpp
+    src/control_bar.cpp
+    src/buffer_view.cpp
 )
 
 file( COPY ${CMAKE_CURRENT_SOURCE_DIR}/deps/SDL2-2.0.12/lib/x64/SDL2.dll 

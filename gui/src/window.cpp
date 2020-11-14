@@ -1,6 +1,15 @@
 #include "window.h"
 
-bool create_window(Window* window, const char* title);
+bool create_window(Window* window, const char* title)
+{
+    return false;
+}
+
+void draw_line(Window* window, Color color, Point a, Point b)
+{
+    SDL_SetRenderDrawColor(window->renderer, color.r, color.g, color.b, color.a);
+    SDL_RenderDrawLine(window->renderer, a.x, a.y, b.x, b.y);
+}
 
 void draw_rect(Window* window, Color color, Point max, Point min)
 {
