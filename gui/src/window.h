@@ -19,6 +19,7 @@ struct Color
 
 const Color COLOR_WHITE = Color{0xffffffff};
 const Color COLOR_DARK  = Color{0x282828ff};
+const Color COLOR_DARK2 = Color{0x504945ff};
 const Color COLOR_GRAY  = Color{0x928374ff};
 const Color COLOR_LIGHT = Color{0xfbf1c7ff};
 

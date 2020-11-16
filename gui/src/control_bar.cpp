@@ -55,5 +55,5 @@ void draw_control_bar(Window* window, ControlBar* bar)
 {
     draw_buttons(&bar->buttons, window);
 
-    draw_line(window, COLOR_GRAY, Point{0,24}, Point{window->width,24});
+    draw_line(window, COLOR_GRAY, Point{0,CONTROL_BAR_HEIGHT}, Point{window->width,CONTROL_BAR_HEIGHT});
 }

@@ -7,6 +7,7 @@ set( CMAKE_EXPORT_COMPILE_COMMANDS ON )
 
 set( include_dirs ${CMAKE_SOURCE_DIR}/compiler/src ${CMAKE_SOURCE_DIR}/interpreter/src )
 
+
 add_subdirectory(compiler)
 add_subdirectory(interpreter)
 

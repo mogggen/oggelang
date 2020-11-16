@@ -52,8 +52,8 @@ int gui_main()
         return 1;
 
     create_control_bar(&window, &control_bar, &font);
-    create_buffer_view(&buffer_view, Point{2,30}, 0,0, &code_font);
-    //open_buffer(&buffer_view, "test_programs/new.ogge");
+    create_buffer_view(&buffer_view, Point{0,CONTROL_BAR_HEIGHT+1}, window.width, window.height-CONTROL_BAR_HEIGHT, &code_font);
+    open_buffer(&buffer_view, "test_programs/long_test.ogge");
 
 
     //int tex_width, tex_height, tex_channels;
@@ -79,8 +79,8 @@ int gui_main()
         SDL_SetRenderDrawColor(window.renderer, 40,40,40,0);
         SDL_RenderClear(window.renderer);
 
-        draw_control_bar(&window, &control_bar);
         draw_buffer_view(&window, &buffer_view);
+        draw_control_bar(&window, &control_bar);
         //SDL_RenderCopy(window.renderer, texture, nullptr, &texture_rect);
 
         SDL_RenderPresent(window.renderer);
@@ -95,7 +95,7 @@ int gui_main()
                    {
                        case SDLK_ESCAPE: running = false; break;
                    }
-               }
+               } break;
             case SDL_MOUSEBUTTONDOWN:
                {
                    Point p = {event.button.x, event.button.y};
@@ -103,12 +103,16 @@ int gui_main()
                    {
                        case SDL_BUTTON_LEFT: check_click(&control_bar.buttons, p); break;
                    }
-               }
+               } break;
+            case SDL_MOUSEWHEEL:
+               {
+                   scroll_update_buffer_view(&buffer_view, event.wheel.y);
+               } break;
             case SDL_MOUSEMOTION:
                {
                    Point p = {event.button.x, event.button.y};
                    check_enter(&control_bar.buttons, p);
-               }
+               } break;
             case SDL_WINDOWEVENT:
                {
                    switch(event.window.event)
@@ -119,7 +123,7 @@ int gui_main()
                                window.height = event.window.data2;
                            } break;
                    }
-               }
+               } break;
         }
 
 
@@ -132,6 +136,3 @@ int gui_main()
 
     return 0;
 }
-
-/*
-*/

@@ -5,6 +5,8 @@
 #include "buttons.h"
 #include "font.h"
 
+const int CONTROL_BAR_HEIGHT = 24;
+
 struct ControlBar
 {
     ButtonGroup buttons;

@@ -1,5 +1,7 @@
 #include "linker.h"
 
+#include <stdlib.h>
+
 int link(std::vector<CompiledObj>& compiled_objects, ByteCode* code)
 {
     int total_size = 0;

@@ -16,11 +16,12 @@ void create_buffer_view(BufferView* view, Point pos, int width, int height, Font
     char error_str[] = "Press O to open file";
     auto len = strlen(error_str);
     view->buffer = (char*)malloc(len+1);
-    strcpy_s(view->buffer, len+1, error_str);
+    memcpy(view->buffer, error_str, len+1);
     view->buffer[len] = '\n';
     view->buffer_size = (long)len;
 
     view->lines.push_back(view->buffer);
+    view->first_visible_line = 0;
 }
 
 void open_buffer(BufferView* view, const char* filename)
@@ -35,7 +36,7 @@ void open_buffer(BufferView* view, const char* filename)
         char error_str[] = "Failed to open file";
         auto len = strlen(error_str);
         view->buffer = (char*)malloc(len+1);
-        strcpy_s(view->buffer, len+1, error_str);
+        memcpy(view->buffer, error_str, len+1);
         view->buffer[len] = '\0';
         view->buffer_size = (long)len;
         return;
@@ -60,18 +61,50 @@ void open_buffer(BufferView* view, const char* filename)
         if( view->buffer[i] == '\n' && i+1 < view->buffer_size)
             view->lines.push_back(view->buffer+i+1);
     }
+
+
+    // calculate the maximum width of the largest line number
+    int n_digits = 0;
+    int n_lines = view->lines.size();
+    while(n_lines > 0)
+    {
+        n_digits++;
+        n_lines /= 10;
+    }
+    char c[] = "0"; 
+    int char_width, char_height;
+    get_text_size(view->font, c, &char_width, &char_height);
+    
+    view->line_num_width = n_digits * char_width;
+    view->first_visible_line = 0;
 }
 
 void draw_buffer_view(Window* window, BufferView* view)
 {
-    Point p = view->pos;
-    p.y += view->font->size;
+    int text_xpos = view->pos.x + view->line_num_width + 2*LINE_NUM_PADDING;
+    int line_num_xpos = LINE_NUM_PADDING;
+    int y_pos = view->pos.y + view->font->size;
 
-    for(char* line : view->lines)
+    draw_rect_fill(window, COLOR_DARK2, Point{view->pos.x + text_xpos, view->pos.y + view->height}, view->pos);
+
+    char num_string[16];
+    for(int i=view->first_visible_line; i < view->lines.size(); i++)
     {
-        draw_text(window, view->font, line, p, '\n', COLOR_BRIGHT_YELLOW);
-        p.y += view->font->size;
+        char* line = view->lines[i];
+        sprintf(num_string, "%d", i+1);
+        draw_text(window, view->font, num_string, Point{line_num_xpos, y_pos}, '\0', COLOR_BRIGHT_BLUE);
+        draw_text(window, view->font, line, Point{text_xpos, y_pos}, '\n', COLOR_LIGHT);
+        y_pos += view->font->size;
     }
+}
+
+void scroll_update_buffer_view(BufferView* view, int scroll)
+{
+    view->first_visible_line -= scroll*3; 
+    if(view->first_visible_line < 0)
+        view->first_visible_line = 0;
+    if(view->first_visible_line > view->lines.size()-1)
+        view->first_visible_line = view->lines.size()-1;
 }
 
 void close_buffer(BufferView* view)
