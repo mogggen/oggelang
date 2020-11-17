@@ -8,7 +8,7 @@
 #include "font.h"
 #include "control_bar.h"
 #include "buffer_view.h"
-
+#include "buffer.h"
 
 int gui_main()
 {
@@ -19,6 +19,7 @@ int gui_main()
     Font font;
     Font code_font;
 
+    Buffer buffer1;
 
     window.width  = 800;
     window.height = 600;
@@ -52,8 +53,11 @@ int gui_main()
         return 1;
 
     create_control_bar(&window, &control_bar, &font);
-    create_buffer_view(&buffer_view, Point{0,CONTROL_BAR_HEIGHT+1}, window.width, window.height-CONTROL_BAR_HEIGHT, &code_font);
-    open_buffer(&buffer_view, "test_programs/long_test.ogge");
+    Area area1 = Area{0,CONTROL_BAR_HEIGHT+1,window.width/2, window.height-CONTROL_BAR_HEIGHT};
+    Area area2 = Area{window.width/2,CONTROL_BAR_HEIGHT+1,window.width/2, window.height-CONTROL_BAR_HEIGHT};
+    buffer_from_source_file("test_programs/long_test.ogge", &buffer1);
+    create_buffer_view(&buffer_view, &code_font);
+    set_buffer(&buffer_view, &buffer1);
 
 
     //int tex_width, tex_height, tex_channels;
@@ -79,7 +83,8 @@ int gui_main()
         SDL_SetRenderDrawColor(window.renderer, 40,40,40,0);
         SDL_RenderClear(window.renderer);
 
-        draw_buffer_view(&window, &buffer_view);
+        draw_buffer_view(&window, &buffer_view, &area2);
+        draw_buffer_view(&window, &buffer_view, &area1);
         draw_control_bar(&window, &control_bar);
         //SDL_RenderCopy(window.renderer, texture, nullptr, &texture_rect);
 
@@ -129,7 +134,7 @@ int gui_main()
 
     }
     
-    close_buffer(&buffer_view);
+    close_buffer(&buffer1);
     SDL_DestroyRenderer(window.renderer);
     SDL_DestroyWindow(window.window);
     SDL_Quit();

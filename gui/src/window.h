@@ -53,6 +53,11 @@ struct Point
     int x,y;
 };
 
+struct Area
+{
+    int x, y, width, height;
+};
+
 struct Image
 {
     SDL_Texture* texture;
