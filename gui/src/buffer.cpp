@@ -39,7 +39,6 @@ void buffer_from_source_file(const char* filename, Buffer* buffer)
     }
 
     buffer->selected_line = 0;
-    buffer->first_visible_line = 0;
 }
 
 void close_buffer(Buffer* buffer)

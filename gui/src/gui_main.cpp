@@ -6,6 +6,7 @@
 #include "window.h"
 #include "buttons.h"
 #include "font.h"
+#include "view.h"
 #include "control_bar.h"
 #include "buffer_view.h"
 #include "buffer.h"
@@ -15,11 +16,16 @@ int gui_main()
     Window window;
     ControlBar control_bar;
     BufferView buffer_view;
+    BufferView buffer_view2;
     
     Font font;
     Font code_font;
 
     Buffer buffer1;
+
+    VSplit _split2 = VSplit((View*)&buffer_view, (View*)&buffer_view2);
+    HSplit _split1 = HSplit((View*)&control_bar, (View*)&_split2, CONTROL_BAR_HEIGHT);
+    View* views = &_split1;
 
     window.width  = 800;
     window.height = 600;
@@ -53,11 +59,11 @@ int gui_main()
         return 1;
 
     create_control_bar(&window, &control_bar, &font);
-    Area area1 = Area{0,CONTROL_BAR_HEIGHT+1,window.width/2, window.height-CONTROL_BAR_HEIGHT};
-    Area area2 = Area{window.width/2,CONTROL_BAR_HEIGHT+1,window.width/2, window.height-CONTROL_BAR_HEIGHT};
     buffer_from_source_file("test_programs/long_test.ogge", &buffer1);
     create_buffer_view(&buffer_view, &code_font);
+    create_buffer_view(&buffer_view2, &code_font);
     set_buffer(&buffer_view, &buffer1);
+    set_buffer(&buffer_view2, &buffer1);
 
 
     //int tex_width, tex_height, tex_channels;
@@ -78,14 +84,16 @@ int gui_main()
     SDL_Event event;
     bool running = true;
 
+    Point mouse_pos = {0,0};
+
     while(running)
     {
         SDL_SetRenderDrawColor(window.renderer, 40,40,40,0);
         SDL_RenderClear(window.renderer);
 
-        draw_buffer_view(&window, &buffer_view, &area2);
-        draw_buffer_view(&window, &buffer_view, &area1);
-        draw_control_bar(&window, &control_bar);
+        //draw_buffer_view(&window, &buffer_view, &area2);
+        Area window_area = Area{0,0,window.width, window.height};
+        views->draw(&window, &window_area);
         //SDL_RenderCopy(window.renderer, texture, nullptr, &texture_rect);
 
         SDL_RenderPresent(window.renderer);
@@ -103,20 +111,20 @@ int gui_main()
                } break;
             case SDL_MOUSEBUTTONDOWN:
                {
-                   Point p = {event.button.x, event.button.y};
                    switch(event.button.button)
                    {
-                       case SDL_BUTTON_LEFT: check_click(&control_bar.buttons, p); break;
+                       case SDL_BUTTON_LEFT:  views->mouse_left_click(mouse_pos); break;
+                       case SDL_BUTTON_RIGHT: views->mouse_right_click(mouse_pos); break;
                    }
                } break;
             case SDL_MOUSEWHEEL:
                {
-                   scroll_update_buffer_view(&buffer_view, event.wheel.y);
+                   views->mouse_scroll_update(event.wheel.y, mouse_pos);
                } break;
             case SDL_MOUSEMOTION:
                {
-                   Point p = {event.button.x, event.button.y};
-                   check_enter(&control_bar.buttons, p);
+                   mouse_pos = {event.button.x, event.button.y};
+                   views->mouse_enter(mouse_pos);
                } break;
             case SDL_WINDOWEVENT:
                {

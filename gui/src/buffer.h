@@ -10,7 +10,6 @@ struct Buffer
     long buffer_size;
     std::vector<char*> lines;
     int selected_line;
-    int first_visible_line;
 };
 
 void buffer_from_source_file(const char* filename, Buffer* buffer);

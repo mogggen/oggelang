@@ -10,6 +10,7 @@ add_library( gui
     src/font.cpp
     src/window.cpp
     src/buttons.cpp
+    src/view.cpp
     src/control_bar.cpp
     src/buffer_view.cpp
     src/buffer.cpp

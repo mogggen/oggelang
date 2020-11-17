@@ -2,7 +2,6 @@
 #define WINDOW_H
 
 #include "SDL.h"
-#include "frame.h"
 
 struct Color
 {
