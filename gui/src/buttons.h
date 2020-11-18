@@ -8,9 +8,10 @@
 struct Button
 {
     int top,bottom,left,right;
+    bool border;
     const char* text;
 
-    void (*click_callback)(void*);
+    void (*click_callback)(void*, void*);
 
     void* callback_data;
 
@@ -21,17 +22,21 @@ struct Button
 struct ButtonGroup
 {
     Font* font;
+    Point pos;
     std::vector<Button> buttons;
+
+    void* callback_owner;
 };
 
 Button* new_button(ButtonGroup* group,
         const char* text,
         Point pos,
-        int width, int height,
-        void (*click_callback)(void*),
+        int width, int height, bool border,
+        void (*click_callback)(void*,void*),
         void* callback_data);
 
-void draw_buttons(ButtonGroup* group, Window* window);
+void clear_buttons(ButtonGroup* buttons);
+void draw_buttons(ButtonGroup* group, Window* window, Point pos);
 void check_click(ButtonGroup* group, Point p);
 void check_enter(ButtonGroup* group, Point p);
 

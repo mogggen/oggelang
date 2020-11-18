@@ -20,9 +20,10 @@ public:
     View* top;
     View* bottom;
     int split_height;
-    bool middle;
+    bool absolut;
+    float height;
 
-    HSplit(View* top, View* bottom);
+    HSplit(View* top, View* bottom, float height);
     HSplit(View* top, View* bottom, int split_height);
 
     void mouse_scroll_update(int scroll, Point mouse_pos); 
@@ -39,12 +40,29 @@ public:
     View* left;
     View* right;
     int split_width;
-    bool middle;
+    bool absolut;
+    float width;
 
-    VSplit(View* left, View* right);
+    VSplit(View* left, View* right, float width);
     VSplit(View* left, View* right, int split_width);
 
     void mouse_scroll_update(int scroll, Point mouse_pos); 
+    void mouse_left_click(Point mouse_pos);
+    void mouse_right_click(Point mouse_pos);
+    void mouse_enter(Point mouse_pos);
+    
+    void draw(Window* window, Area* area);
+};
+
+class ViewSelect : public View
+{
+public:
+    View* inner;
+    Area button_area;
+    
+    ViewSelect(View* inner);
+    
+    void mouse_scroll_update(int scroll, Point mouse_pos);
     void mouse_left_click(Point mouse_pos);
     void mouse_right_click(Point mouse_pos);
     void mouse_enter(Point mouse_pos);

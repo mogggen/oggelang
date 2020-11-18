@@ -10,22 +10,22 @@ void ControlBar::mouse_enter(Point mouse_pos)
 }
 void ControlBar::draw(Window* window, Area* area)
 {
-    draw_buttons(&this->buttons, window);
+    draw_buttons(&this->buttons, window, Point{area->x, area->y});
 
     //draw_line(window, COLOR_GRAY, Point{0,CONTROL_BAR_HEIGHT}, Point{window->width,CONTROL_BAR_HEIGHT});
 }
 
-void open_file_button_callback(void*)
+void open_file_button_callback(void* owner, void*)
 {
     printf("Open file button\n");
 }
 
-void run_button_callback(void*)
+void run_button_callback(void* owner, void*)
 {
     printf("Run button\n");
 }
 
-void stop_button_callback(void*)
+void stop_button_callback(void* owner, void*)
 {
     printf("Stop button\n");
 }
@@ -33,6 +33,7 @@ void stop_button_callback(void*)
 void create_control_bar(Window* window, ControlBar* bar, Font* font)
 {
     bar->buttons.font = font;
+    bar->buttons.callback_owner = bar;
 
     int x_pos = 2;
     int y_pos = 2;
@@ -41,7 +42,7 @@ void create_control_bar(Window* window, ControlBar* bar, Font* font)
         Button* b = new_button(&bar->buttons,
                 "Open",
                 Point{x_pos,y_pos},
-                0,20,
+                0,20, true,
                 open_file_button_callback,
                 nullptr);
         x_pos += b->right - b->left + 4;
@@ -50,7 +51,7 @@ void create_control_bar(Window* window, ControlBar* bar, Font* font)
         Button* b = new_button(&bar->buttons,
                 "Run",
                 Point{x_pos,y_pos},
-                0,20,
+                0,20, true,
                 run_button_callback,
                 nullptr);
         x_pos += b->right - b->left + 4;
@@ -59,7 +60,7 @@ void create_control_bar(Window* window, ControlBar* bar, Font* font)
         Button* b = new_button(&bar->buttons,
                 "Stop",
                 Point{x_pos,y_pos},
-                0,20,
+                0,20, true,
                 stop_button_callback,
                 nullptr);
         x_pos += b->right - b->left + 4;

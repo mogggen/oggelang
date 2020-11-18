@@ -57,6 +57,12 @@ struct Area
     int x, y, width, height;
 };
 
+inline bool in_area(Area* area, Point pos)
+{
+    return area->x <= pos.x && pos.x <= area->x + area->width &&
+            area->y <= pos.y && pos.y <= area->y + area->height;
+}
+
 struct Image
 {
     SDL_Texture* texture;
