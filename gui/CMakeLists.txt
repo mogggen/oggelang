@@ -15,6 +15,7 @@ add_library( gui
     src/buffer_view.cpp
     src/buffer.cpp
     src/float_menu.cpp
+    src/file_util.cpp
 )
 
 file( COPY ${CMAKE_CURRENT_SOURCE_DIR}/deps/SDL2-2.0.12/lib/x64/SDL2.dll 

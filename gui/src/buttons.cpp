@@ -59,7 +59,7 @@ void draw_buttons(ButtonGroup* group, Window* window, Point pos)
 void check_click(ButtonGroup* group, Point pos)
 {
     Point p = Point{pos.x - group->pos.x, pos.y - group->pos.y};
-    for(auto b : group->buttons)
+    for(Button& b : group->buttons)
     {
         if( b.left <= p.x && p.x <= b.right &&
             b.top <= p.y && p.y <= b.bottom)
