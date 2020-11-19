@@ -1,5 +1,5 @@
-#ifndef UTIL_H
-#define UTIL_H
+#ifndef FILE_LOCATION_H
+#define FILE_LOCATION_H
 
 struct FileLocation
 {

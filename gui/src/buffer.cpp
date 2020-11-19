@@ -1,14 +1,19 @@
 #include "buffer.h"
 
-void buffer_from_source_file(const char* filename, Buffer* buffer)
+#include "util.h"
+#include "file_util.h"
+
+void buffer_from_source_file(Buffer* buffer, const char* filepath)
 {
-    buffer->filename = filename;
+    buffer->filepath = filepath;
+    buffer->filepath_hash = hash_djb2(filepath);
+    buffer->filename = get_filename_form_path(filepath);
 
     FILE* file;
-    auto error_no = fopen_s(&file, filename, "r");
+    auto error_no = fopen_s(&file, filepath, "r");
     if(error_no != 0)
     {
-        printf("Failed to open file %s\n", filename);
+        printf("Failed to open file %s\n", filepath);
         char error_str[] = "Failed to open file";
         auto len = strlen(error_str);
         buffer->buffer = (char*)malloc(len+1);

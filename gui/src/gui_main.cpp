@@ -1,6 +1,7 @@
 #include "gui_main.h"
 
 #include <stdio.h>
+#include <vector>
 #include "SDL.h"
 #include "stb_image.h"
 #include "block_alloc.h"
@@ -13,6 +14,7 @@
 #include "buffer.h"
 #include "float_menu.h"
 #include "file_util.h"
+#include "util.h"
 
 #define allocate_new(dest, alloc, type, construct) {\
     dest = (type *)allocate(alloc, sizeof( type ));\
@@ -33,6 +35,8 @@ struct Gui
 
     bool float_menu_is_open = false;
     FloatMenu float_menu;
+
+    std::vector<Buffer> buffers;
 };
 
 Gui gui;
@@ -102,9 +106,9 @@ int gui_main()
         return 0;
         
     Buffer buffer1;
-    buffer_from_source_file("test_programs/long_test.ogge", &buffer1);
-    set_buffer(&gui.buffer_views[0], &buffer1);
-    set_buffer(&gui.buffer_views[1], &buffer1);
+    //buffer_from_source_file("test_programs/long_test.ogge", &buffer1);
+    //set_buffer(&gui.buffer_views[0], &buffer1);
+    //set_buffer(&gui.buffer_views[1], &buffer1);
 
     //int tex_width, tex_height, tex_channels;
     //unsigned char* data = stbi_load("run.png", &tex_width, &tex_height, &tex_channels, STBI_rgb_alpha);
@@ -192,7 +196,8 @@ int gui_main()
 
     }
     
-    close_buffer(&buffer1);
+    for(auto b: gui.buffers)
+        close_buffer(&b);
     SDL_DestroyRenderer(gui.window.renderer);
     SDL_DestroyWindow(gui.window.window);
     SDL_Quit();
@@ -203,23 +208,55 @@ int gui_main()
 }
 
 
-const char* test_options[] = {"Hello", "there", "General", "Kenobi"};
 
-void open_float_menu(int xpos, int ypos, const char** options, int n_options)
+void open_float_menu(int xpos, int ypos, const char** options, int n_options, void(*callback)(int))
 {
     if(gui.float_menu_is_open)
         return;
 
-    init_float_menu(&gui.float_menu, Point{xpos,ypos}, options, n_options, &gui.regular_font, gui.window.width, gui.window.height);
+    init_float_menu(&gui.float_menu, Point{xpos,ypos}, options, n_options, &gui.regular_font, gui.window.width, gui.window.height, callback);
     gui.float_menu_is_open = true;
 }
 
-void open_select_view_menu(int xpos, int ypos)
+Buffer& get_buffer(int buffer_idx)
 {
-    open_float_menu(xpos, ypos, test_options, 4);
+    return gui.buffers[buffer_idx];
+}
+std::vector<Buffer>& get_buffers()
+{
+    return gui.buffers;
 }
 
 void open_file()
 {
-    get_open_file_name(&gui.window);
+    char filepath[1024];
+    if(!get_open_file_path(&gui.window, filepath, 1024))
+        return;
+
+    // check if file is already in a buffer
+    unsigned long filepath_hash = hash_djb2(filepath);
+    int i = 0;
+    for(Buffer& b : gui.buffers)
+    {
+        if(b.filepath_hash == filepath_hash)
+        {
+            set_buffer(&gui.buffer_views[0], i);
+            return;
+        }
+        i++;
+    }
+
+    int filepath_len = strlen(filepath)+1;
+
+    printf("opend new file\n");
+
+    char* filen = (char*)allocate(gui.alloc, filepath_len);
+    memcpy(filen, filepath, filepath_len);
+
+    Buffer new_buffer;
+    buffer_from_source_file(&new_buffer, filen);
+    
+    gui.buffers.push_back(new_buffer);
+
+    set_buffer(&gui.buffer_views[0], gui.buffers.size()-1);
 }

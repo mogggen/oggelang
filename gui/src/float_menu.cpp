@@ -4,12 +4,14 @@ void button_callback(void* owner, void* data)
 {
     FloatMenu* menu = (FloatMenu*)owner;
     printf("Picked: %s\n", menu->options[(int)data]);
+    menu->callback((int)data);
 }
 
-void init_float_menu(FloatMenu* menu, Point pos, const char** options, int n_options, Font* font, int win_width, int win_height)
+void init_float_menu(FloatMenu* menu, Point pos, const char** options, int n_options, Font* font, int win_width, int win_height, void(*callback)(int))
 {
     menu->options = options;
     menu->n_options = n_options;
+    menu->callback = callback;
 
     menu->buttons.font = font;
     menu->buttons.callback_owner = menu;

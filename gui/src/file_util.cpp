@@ -7,8 +7,23 @@
 #include "SDL.h"
 #include "SDL_syswm.h"
 
-void get_open_file_name(Window* window)
+const char* get_filename_form_path(const char* file_path)
 {
+    const char* last_slash = file_path;
+
+    while(*file_path != '\0')
+    {
+        if(*file_path == '\\')
+            last_slash = file_path;
+        file_path++;
+    }
+    return last_slash+1;
+}
+
+bool get_open_file_path(Window* window, char* file_path_buf, int buf_size)
+{
+    file_path_buf[0] = '\0';
+
     // get HWND
     SDL_SysWMinfo sdlinfo; 
     SDL_version sdlver;
@@ -18,16 +33,13 @@ void get_open_file_name(Window* window)
     HWND hwnd = sdlinfo.info.win.window;
 
 
-    char buf[MAX_PATH];
-    buf[0] = '\0';
-
     OPENFILENAMEA ofn;
     ZeroMemory(&ofn, sizeof(ofn));
 
     ofn.lStructSize = sizeof(ofn);
     ofn.hwndOwner = hwnd;
-    ofn.lpstrFile = buf;
-    ofn.nMaxFile = MAX_PATH;
+    ofn.lpstrFile = file_path_buf;
+    ofn.nMaxFile = buf_size;
     ofn.lpstrFilter = "Ogge Files (*.ogge)\0*.ogge\0All Files (*.*)\0*.*\0";
     ofn.nFilterIndex = 1;
     ofn.lpstrFileTitle = nullptr;
@@ -35,14 +47,15 @@ void get_open_file_name(Window* window)
     ofn.lpstrInitialDir = nullptr;
     ofn.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST;
 
-    if(GetOpenFileNameA(&ofn))
-    {
-        printf("Selected: %s\n", buf);
-    }
-    else
+    if(!GetOpenFileNameA(&ofn))
     {
         printf("%lu\n", CommDlgExtendedError());
+        return false;
     }
+
+    printf("Selected: %s\n", file_path_buf);
+
+    return true;
 }
 
 #endif

@@ -11,6 +11,7 @@
 #include "gen_bytecode.h"
 #include "linker.h"
 #include "error.h"
+#include "util.h"
 
 int find_last_char(const char* str, char c)
 {

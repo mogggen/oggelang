@@ -114,10 +114,11 @@ void ViewSelect::mouse_scroll_update(int scroll, Point mouse_pos)
 {
     inner->mouse_scroll_update(scroll, mouse_pos);
 }
+
 void ViewSelect::mouse_left_click(Point mouse_pos)
 {
     if(in_area(&button_area, mouse_pos))
-        open_select_view_menu(mouse_pos.x, mouse_pos.y); 
+    {}
     else
         inner->mouse_left_click(mouse_pos);
     
