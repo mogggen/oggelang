@@ -36,6 +36,8 @@ struct Gui
     bool float_menu_is_open = false;
     FloatMenu float_menu;
 
+    int main_buffer = -1;
+
     std::vector<Buffer> buffers;
 };
 
@@ -153,6 +155,11 @@ int gui_main()
                    switch(event.key.keysym.sym)
                    {
                        case SDLK_ESCAPE: running = false; break;
+                       case SDLK_o: 
+                         {
+                            if(event.key.keysym.mod & KMOD_CTRL)
+                                open_file();
+                         } break;
                    }
                } break;
             case SDL_MOUSEBUTTONDOWN:
@@ -227,6 +234,11 @@ std::vector<Buffer>& get_buffers()
     return gui.buffers;
 }
 
+void reload_buffers()
+{
+    
+}
+
 void open_file()
 {
     char filepath[1024];
@@ -257,6 +269,10 @@ void open_file()
     buffer_from_source_file(&new_buffer, filen);
     
     gui.buffers.push_back(new_buffer);
+    int new_buffer_idx = gui.buffers.size()-1;
 
-    set_buffer(&gui.buffer_views[0], gui.buffers.size()-1);
+    if( gui.main_buffer < 0 )
+        gui.main_buffer = new_buffer_idx;
+
+    set_buffer(&gui.buffer_views[0], new_buffer_idx);
 }
