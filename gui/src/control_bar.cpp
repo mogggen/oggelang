@@ -1,6 +1,6 @@
 #include "control_bar.h"
 
-#include "file_util.h"
+#include "gui_main.h"
     
 void ControlBar::mouse_left_click(Point mouse_pos)
 {
@@ -21,7 +21,7 @@ void open_file_button_callback(void* owner, void* data)
 {
     Window* window = (Window*)data;
     printf("Open file button\n");
-    get_open_file_name(window);
+    open_file();
 }
 
 void run_button_callback(void* owner, void*)

@@ -12,6 +12,7 @@
 #include "buffer_view.h"
 #include "buffer.h"
 #include "float_menu.h"
+#include "file_util.h"
 
 #define allocate_new(dest, alloc, type, construct) {\
     dest = (type *)allocate(alloc, sizeof( type ));\
@@ -216,4 +217,9 @@ void open_float_menu(int xpos, int ypos, const char** options, int n_options)
 void open_select_view_menu(int xpos, int ypos)
 {
     open_float_menu(xpos, ypos, test_options, 4);
+}
+
+void open_file()
+{
+    get_open_file_name(&gui.window);
 }
