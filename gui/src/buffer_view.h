@@ -13,12 +13,13 @@ class BufferView : public View
 {
 public:
     int buffer_idx;
+    Point pos;
     Font* font;
     int line_num_width;
     int first_visible_line;
 
     void mouse_scroll_update(int scroll, Point mouse_pos);
-    void mouse_right_click(Point mouse_pos);
+    void mouse_left_click(Point mouse_pos);
 
     void draw(Window* window, Area* area);
 };

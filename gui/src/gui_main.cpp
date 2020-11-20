@@ -134,6 +134,9 @@ int gui_main()
 
     while(running)
     {
+        for(Buffer& b: gui.buffers)
+            reload_buffer(&b);
+
         SDL_SetRenderDrawColor(gui.window.renderer, 40,40,40,0);
         SDL_RenderClear(gui.window.renderer);
 
@@ -234,9 +237,11 @@ std::vector<Buffer>& get_buffers()
     return gui.buffers;
 }
 
-void reload_buffers()
+Buffer* get_main_buffer()
 {
-    
+    if(gui.main_buffer >= 0)
+        return &get_buffer(gui.main_buffer);
+    return nullptr;
 }
 
 void open_file()
@@ -276,3 +281,5 @@ void open_file()
 
     set_buffer(&gui.buffer_views[0], new_buffer_idx);
 }
+
+print(int(input())*64)

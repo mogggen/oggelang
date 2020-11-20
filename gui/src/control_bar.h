@@ -13,6 +13,7 @@ class ControlBar : public View
 public:
     ButtonGroup buttons;
 
+    int selected_buffer = -1;
     void mouse_left_click(Point mouse_pos);
     void mouse_enter(Point mouse_pos);
 

@@ -27,24 +27,29 @@ void select_buffer_menu_callback(int i)
 }
 
 const char* select_buffer_options[16];
-void BufferView::mouse_right_click(Point mouse_pos)
+void BufferView::mouse_left_click(Point mouse_pos)
 {
-    selected_buffer_view = this; 
-
-    int i = 0;
-    for(const Buffer& b: get_buffers())
+    if(mouse_pos.y < this->pos.y + this->font->size)
     {
-        select_buffer_options[i] = b.filename;
-        i++;
-        if(i>16)
-            break;
+        selected_buffer_view = this; 
+
+        int i = 0;
+        for(const Buffer& b: get_buffers())
+        {
+            select_buffer_options[i] = b.filename;
+            i++;
+            if(i>16)
+                break;
+        }
+
+        open_float_menu(mouse_pos.x, mouse_pos.y, select_buffer_options, i, select_buffer_menu_callback);
     }
 
-    open_float_menu(mouse_pos.x, mouse_pos.y, select_buffer_options, i, select_buffer_menu_callback);
 }
 
 void BufferView::draw(Window* window, Area* area)
 {
+    this->pos = {area->x, area->y};
     int text_xpos = area->x + this->line_num_width + 2*LINE_NUM_PADDING;
     int line_num_xpos = area->x + LINE_NUM_PADDING;
     int y_pos = area->y + this->font->size*2;

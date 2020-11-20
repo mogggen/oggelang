@@ -8,6 +8,7 @@ void open_float_menu(int xpos, int ypos, const char** options, int n_options, vo
 
 Buffer& get_buffer(int buffer_idx);
 std::vector<Buffer>& get_buffers();
+Buffer* get_main_buffer();
 void open_file();
 
 #endif

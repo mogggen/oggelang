@@ -1,11 +1,14 @@
 #include "file_util.h"
 
 #ifdef WIN32
+
 #include <windows.h>
 #include <commdlg.h>
 #include <stdio.h>
 #include "SDL.h"
 #include "SDL_syswm.h"
+#include <sys/types.h>
+#include <sys/stat.h>
 
 const char* get_filename_form_path(const char* file_path)
 {
@@ -18,6 +21,17 @@ const char* get_filename_form_path(const char* file_path)
         file_path++;
     }
     return last_slash+1;
+}
+
+#define stat _stat
+
+long long get_last_modified_time(const char* filename)
+{
+    struct stat result;
+    if(stat(filename, &result) == 0)
+        return result.st_mtime;
+    else
+        return 0;
 }
 
 bool get_open_file_path(Window* window, char* file_path_buf, int buf_size)
