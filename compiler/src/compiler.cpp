@@ -27,14 +27,18 @@ int find_last_char(const char* str, char c)
     return last_pos;
 }
 
-int compile_program(ByteCode* out_code, const char* filename, bool print_ast)
+int compile_program(ByteCode* out_code, const char* filename, bool print_ast, DebugInfo* out_dbginfo)
 {
     std::vector<CompiledObj> compiled_objects;
 
-    std::unordered_set<unsigned long> compiled_files;
+    BlockAlloc symbol_names_alloc = create_block_alloc(1024);
+
+    std::unordered_set<unsigned long> compiled_files; // set of all compiled files
     std::queue<const char*> compile_queue;
 
-    char filename_buffer[1024];
+    char filepath_buffer[1024]; // buffer for directory and filename
+
+    // find directory
     int last_slash = find_last_char(filename, '/');
     int directory_size;
     if(last_slash < 0)
@@ -45,26 +49,29 @@ int compile_program(ByteCode* out_code, const char* filename, bool print_ast)
     else
     {
         directory_size = last_slash+1;
-        strncpy(filename_buffer, filename, directory_size);
-        compile_queue.push(filename+directory_size);
+        strncpy(filepath_buffer, filename, directory_size); // copy directory to filepath_buffer
+        compile_queue.push(filename+directory_size); // push only filename and not entire path
     }
 
 
     while(compile_queue.size() > 0)
     {
         const char* filename = compile_queue.front();
-        strcpy(filename_buffer+directory_size, filename);
+        strcpy(filepath_buffer+directory_size, filename); // append filename to directory
 
+        // create lexer
         LexerContext lexer;
-        if(!create_lexer(&lexer, filename, filename_buffer))
+        if(!create_lexer(&lexer, filename, filepath_buffer, &symbol_names_alloc))
         {
-            printf("Could not open file: %s\n", filename_buffer);
+            printf("Could not open file: %s\n", filepath_buffer);
             return 0;
         }
-        printf("Compiling : %s\n", filename_buffer);
+        printf("Compiling : %s\n", filepath_buffer);
 
         BlockAlloc alloc = create_block_alloc(1024);
 
+
+        // parser
         AstStatement* root = parse(lexer, alloc);
             
         if( get_num_error() > 0 )
@@ -75,6 +82,7 @@ int compile_program(ByteCode* out_code, const char* filename, bool print_ast)
         else if(print_ast)
             print_statement(root);
 
+        // generate byte code
         compiled_objects.push_back(gen_bytecode(root));
         CompiledObj& obj = compiled_objects.back();
 
@@ -89,6 +97,7 @@ int compile_program(ByteCode* out_code, const char* filename, bool print_ast)
         compile_queue.pop();
         compiled_files.insert(obj.filename_hash);
 
+        // add dependent files to compile queue
         for(auto file : obj.dependent_files)
         {
             auto search = compiled_files.find(hash_djb2(file));
@@ -100,8 +109,18 @@ int compile_program(ByteCode* out_code, const char* filename, bool print_ast)
     }
     
 
-    if(!link(compiled_objects, out_code))
-        return 0;
+    if(out_dbginfo == nullptr)
+    {
+        if(!link(compiled_objects, out_code))
+            return 0;
+    }
+    else
+    {
+        if(!link_debug(compiled_objects, out_code, out_dbginfo))
+            return 0;
+    }
+
+    dealloc(symbol_names_alloc);
 
     return 1;
 }

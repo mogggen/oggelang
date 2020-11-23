@@ -56,9 +56,9 @@ void convert_to_unix_file_path(char* path)
 int main(int argc, char** argv)
 {
     CliParameters parameters = parse_cliargs(argc, argv);
-    parameters.print_ast = true;
-    parameters.print_opcodes = true;
-    parameters.run_program = false;
+    //parameters.print_ast = true;
+    //parameters.print_opcodes = true;
+    //parameters.run_program = false;
     parameters.gui = true;
 
     if(parameters.gui)
@@ -79,7 +79,7 @@ int main(int argc, char** argv)
 #endif
 
         ByteCode code;
-        if(!compile_program(&code, parameters.filename, parameters.print_ast))
+        if(!compile_program(&code, parameters.filename, parameters.print_ast, nullptr))
         {
             return 0;
         }

@@ -1,6 +1,8 @@
 #ifndef OPCODES_H
 #define OPCODES_H
 
+#include "debug_info.h"
+
 enum class OpCode
 {
     PUSHC,
@@ -53,5 +55,6 @@ struct ByteCode
 };
 
 void print_opcodes(ByteCode code);
+void print_opcodes(ByteCode code, DebugInfo* dbginfo);
 
 #endif

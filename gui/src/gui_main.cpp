@@ -13,8 +13,12 @@
 #include "buffer_view.h"
 #include "buffer.h"
 #include "float_menu.h"
+
 #include "file_util.h"
 #include "util.h"
+#include "debug_info.h"
+#include "opcodes.h"
+#include "compiler.h"
 
 #define allocate_new(dest, alloc, type, construct) {\
     dest = (type *)allocate(alloc, sizeof( type ));\
@@ -37,6 +41,9 @@ struct Gui
     FloatMenu float_menu;
 
     int main_buffer = -1;
+
+    ByteCode byte_code;
+    DebugInfo dbginfo;
 
     std::vector<Buffer> buffers;
 };
@@ -277,9 +284,10 @@ void open_file()
     int new_buffer_idx = gui.buffers.size()-1;
 
     if( gui.main_buffer < 0 )
+    {
         gui.main_buffer = new_buffer_idx;
+        compile_program(&gui.byte_code, filepath, true, &gui.dbginfo);
+    }
 
     set_buffer(&gui.buffer_views[0], new_buffer_idx);
 }
-
-print(int(input())*64)

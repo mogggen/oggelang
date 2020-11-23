@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "error.h"
+#include "util.h"
 
 #define  GOTO_STRING "goto"
 #define  IF_STRING "if"
@@ -12,25 +13,16 @@
 #define  PRINTC_STRING "printc"
 #define  SCAN_STRING "scan"
 
-constexpr unsigned long hash_djb2(const char*str)
-{
-    unsigned long hash = 5381;
-    int c = 0;
-    while ((c = *str++))
-        hash = hash*33 + c;
-
-    return hash;
-}
-
-bool create_lexer(LexerContext* ctx, const char* filename, const char* path)
+bool create_lexer(LexerContext* ctx, const char* filename, const char* path, BlockAlloc* symbol_names_alloc)
 {
     ctx->file = fopen(path, "r");
     if(ctx->file == nullptr)
         return false;
 
     ctx->loc = FileLocation{filename, 1, 1};
+    ctx->symbol_names_alloc = symbol_names_alloc;
 
-    fetch_token(*ctx);
+    fetch_token(*ctx); // get current_token
 
     return true;
 }
@@ -197,7 +189,7 @@ Token fetch_token(LexerContext& ctx)
                 {
                     new_token.type = TokenType::IDENTIFIER;
                     int len = strlen(buf);
-                    new_token.data = (char*)malloc(len+1);
+                    new_token.data = (char*)allocate(*ctx.symbol_names_alloc, len+1);
                     memcpy(new_token.data, buf, len+1);
                 }
             } break;

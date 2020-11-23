@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include "file_location.h"
+#include "block_alloc.h"
 
 enum class TokenType
 {
@@ -57,9 +58,10 @@ struct LexerContext
     FILE* file;
     FileLocation loc;
     Token current_token;
+    BlockAlloc* symbol_names_alloc;
 };
 
-bool create_lexer(LexerContext* ctx, const char* filename, const char* path);
+bool create_lexer(LexerContext* ctx, const char* filename, const char* path, BlockAlloc* symbol_names_alloc);
 Token fetch_token(LexerContext& ctx);
 const Token& peek_token(LexerContext& ctx);
 void release_lexer(LexerContext& ctx);

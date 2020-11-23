@@ -4,20 +4,25 @@
 #include "error.h"
 #include "util.h"
 
+struct Variable
+{
+    int addr;
+    const char* name;
+};
 
 struct GeneratorCtx
 {
     std::vector<int> program_data;
-    std::vector<AddrLinenum> program_line_num;
+    std::vector<int> program_line_num;
     int n_variables = 0;
-    std::unordered_map<unsigned long, int> var_table;
+    std::unordered_map<unsigned long, Variable> var_table;
     std::vector<int> var_addr;
     std::vector<AddrLinenum> goto_addr;
     unsigned long filename_hash;
     std::vector<const char*> dependent_files;
 };
 
-int get_variable(std::unordered_map<unsigned long, int>& var_table, const char* name, FileLocation loc)
+int get_variable(std::unordered_map<unsigned long, Variable>& var_table, const char* name, FileLocation loc)
 {
     auto search = var_table.find(hash_djb2(name));
 
@@ -27,12 +32,12 @@ int get_variable(std::unordered_map<unsigned long, int>& var_table, const char* 
         return -1;
     }
     else
-        return search->second;
+        return search->second.addr;
 }
 
-bool add_variable(std::unordered_map<unsigned long, int>& var_table, const char* name, int addr, FileLocation loc)
+bool add_variable(std::unordered_map<unsigned long, Variable>& var_table, const char* name, int addr, FileLocation loc)
 {
-    auto res = var_table.insert({hash_djb2(name), addr});
+    auto res = var_table.insert({hash_djb2(name), Variable{addr, name}});
     if(!res.second)
     {
         report_error("Variable already declared.", loc);
@@ -258,7 +263,7 @@ int gen_bytecode_statement(GeneratorCtx& gc, AstStatement* stmt)
                     gc.goto_addr.push_back({gc.program_data.size(), hash_djb2(stmt->goto_filename), stmt->goto_line_number});
                     gc.dependent_files.push_back(stmt->goto_filename);
                 }
-                gc.program_line_num.push_back({beginning_addr, gc.filename_hash, stmt->loc.line});
+                //gc.program_line_num.push_back({beginning_addr, gc.filename_hash, stmt->loc.line});
                 gc.program_data.push_back(0);
             } break;
         case StatementType::IF:
@@ -266,7 +271,7 @@ int gen_bytecode_statement(GeneratorCtx& gc, AstStatement* stmt)
                 if(gen_bytecode_expression(gc, stmt->expression))
                 {
                     gc.program_data.push_back((int)OpCode::IF);
-                    gc.program_line_num.push_back({beginning_addr, gc.filename_hash, stmt->loc.line});
+                    //gc.program_line_num.push_back({beginning_addr, gc.filename_hash, stmt->loc.line});
                     int location = gc.program_data.size();
                     gc.program_data.push_back(0);
 
@@ -288,7 +293,7 @@ int gen_bytecode_statement(GeneratorCtx& gc, AstStatement* stmt)
                 gc.program_data.push_back((int)OpCode::MOVED);
                 gc.program_data.push_back(addr);
                 gc.var_addr.push_back(gc.program_data.size()-1);
-                gc.program_line_num.push_back({beginning_addr, gc.filename_hash, stmt->loc.line});
+                //gc.program_line_num.push_back({beginning_addr, gc.filename_hash, stmt->loc.line});
             } break;
         case StatementType::ASSIGN:
             {
@@ -301,7 +306,7 @@ int gen_bytecode_statement(GeneratorCtx& gc, AstStatement* stmt)
                     gc.program_data.push_back((int)OpCode::MOVED);
                     gc.program_data.push_back(addr);
                     gc.var_addr.push_back(gc.program_data.size()-1);
-                    gc.program_line_num.push_back({beginning_addr, gc.filename_hash, stmt->loc.line});
+                    //gc.program_line_num.push_back({beginning_addr, gc.filename_hash, stmt->loc.line});
                 }
             } break;
         case StatementType::DERF_ASSIGN:
@@ -313,7 +318,7 @@ int gen_bytecode_statement(GeneratorCtx& gc, AstStatement* stmt)
                     break;
 
                 gc.program_data.push_back((int)OpCode::MOVE);
-                gc.program_line_num.push_back({beginning_addr, gc.filename_hash, stmt->loc.line});
+                //gc.program_line_num.push_back({beginning_addr, gc.filename_hash, stmt->loc.line});
             } break;
         case StatementType::PRINT:
             {
@@ -323,7 +328,7 @@ int gen_bytecode_statement(GeneratorCtx& gc, AstStatement* stmt)
                         gc.program_data.push_back((int)OpCode::PRINTC);
                     else
                         gc.program_data.push_back((int)OpCode::PRINT);
-                    gc.program_line_num.push_back({beginning_addr, gc.filename_hash, stmt->loc.line});
+                    //gc.program_line_num.push_back({beginning_addr, gc.filename_hash, stmt->loc.line});
                 }
             } break;
         case StatementType::SCAN:
@@ -331,7 +336,7 @@ int gen_bytecode_statement(GeneratorCtx& gc, AstStatement* stmt)
                 if(gen_bytecode_expression(gc, stmt->expression))
                 {
                     gc.program_data.push_back((int)OpCode::SCAN);
-                    gc.program_line_num.push_back({beginning_addr, gc.filename_hash, stmt->loc.line});
+                    //gc.program_line_num.push_back({beginning_addr, gc.filename_hash, stmt->loc.line});
                 }
             } break;
     }
@@ -347,19 +352,29 @@ CompiledObj gen_bytecode(AstStatement* root)
     AstStatement* statement = root;
     while(statement != nullptr)
     {
-        gen_bytecode_statement(gc, statement);
+        int stmt_size = gen_bytecode_statement(gc, statement);
+        for(int i=0; i<stmt_size;i++)
+            gc.program_line_num.push_back(statement->loc.line);
         statement = statement->next;
     }
 
     gc.program_data.push_back((int)OpCode::END);
+    gc.program_line_num.push_back(gc.program_line_num.back()); // linenumber for END
+
+    std::vector<const char*> var_names(gc.n_variables);
+
+    for(auto var : gc.var_table)
+        var_names[var.second.addr] = var.second.name;
 
 
     return CompiledObj{
         gc.program_data,
         gc.n_variables,
         gc.var_addr,
+        var_names,
         gc.program_line_num,
         gc.goto_addr,
+        root->loc.filename,
         gc.filename_hash,
         gc.dependent_files
     };

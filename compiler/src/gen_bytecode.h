@@ -16,9 +16,11 @@ struct CompiledObj
 {
     std::vector<int> code;
     int nr_variables;
-    std::vector<int> var_addr;
-    std::vector<AddrLinenum> program_line_num;
+    std::vector<int> var_addr; //addresses which values are pointers to variables
+    std::vector<const char*> var_names;
+    std::vector<int> program_line_num;
     std::vector<AddrLinenum> goto_addr;
+    const char* filename;
     unsigned long filename_hash;
     std::vector<const char*> dependent_files;
 };
