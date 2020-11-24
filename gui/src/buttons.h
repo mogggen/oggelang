@@ -21,7 +21,7 @@ struct Button
 
 struct ButtonGroup
 {
-    Font* font;
+    const Font* font;
     Point pos;
     std::vector<Button> buttons;
 

@@ -57,4 +57,7 @@ struct ByteCode
 void print_opcodes(ByteCode code);
 void print_opcodes(ByteCode code, DebugInfo* dbginfo);
 
+/*OBS!!! This function might look at *(opcode+1)*/
+int opcode_to_string(OpCode* opcode, char* out_string);
+
 #endif

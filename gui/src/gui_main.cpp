@@ -11,6 +11,7 @@
 #include "view.h"
 #include "control_bar.h"
 #include "buffer_view.h"
+#include "bytecode_view.h"
 #include "buffer.h"
 #include "float_menu.h"
 
@@ -30,10 +31,9 @@ struct Gui
 {
     BlockAlloc alloc;
     Window window;
-    Font regular_font;
-    Font monospace_font;
 
     ControlBar control_bar;
+    ByteCodeView bytecode_view;
     BufferView buffer_views[2];
     View* views;
 
@@ -79,19 +79,15 @@ int init_gui(Gui* gui)
     SDL_SetRenderDrawBlendMode(gui->window.renderer, SDL_BLENDMODE_BLEND);
 
     // init fonts
-    if(!init_fonts())
-        return 0;
-
-    if(!create_font(&gui->regular_font, &gui->window, "ArialCEBold.ttf", 12))
-        return 0;
-    if(!create_font(&gui->monospace_font, &gui->window, "UbuntuMono-Regular.ttf", 17))
+    if(!init_fonts(&gui->window))
         return 0;
 
     // init views
-    
-    create_control_bar(&gui->window, &gui->control_bar, &gui->regular_font);
+    create_control_bar(&gui->window, &gui->control_bar);
+    create_bytecode_view(&gui->bytecode_view);
     for(int i=0; i<2; i++)
-        create_buffer_view(&gui->buffer_views[i], &gui->monospace_font);
+        create_buffer_view(&gui->buffer_views[i]);
+
 
     ViewSelect* select1;
     ViewSelect* select2;
@@ -99,7 +95,7 @@ int init_gui(Gui* gui)
     HSplit* split1;
 
     allocate_new(select1, gui->alloc, ViewSelect, ViewSelect((View*)&gui->buffer_views[0]))
-    allocate_new(select2, gui->alloc, ViewSelect, ViewSelect((View*)&gui->buffer_views[1]))
+    allocate_new(select2, gui->alloc, ViewSelect, ViewSelect((View*)&gui->bytecode_view))
     
     allocate_new(split2, gui->alloc, VSplit, VSplit((View*)select1, (View*)select2, 0.5f))
     allocate_new(split1, gui->alloc, HSplit, HSplit((View*)&gui->control_bar, (View*)split2, CONTROL_BAR_HEIGHT))
@@ -151,7 +147,7 @@ int gui_main()
         Area window_area = Area{0,0,gui.window.width, gui.window.height};
         gui.views->draw(&gui.window, &window_area);
         if(gui.float_menu_is_open)
-            draw_float_menu(&gui.window, &gui.float_menu, &gui.regular_font);
+            draw_float_menu(&gui.window, &gui.float_menu);
         //SDL_RenderCopy(window.renderer, texture, nullptr, &texture_rect);
 
         SDL_RenderPresent(gui.window.renderer);
@@ -231,7 +227,7 @@ void open_float_menu(int xpos, int ypos, const char** options, int n_options, vo
     if(gui.float_menu_is_open)
         return;
 
-    init_float_menu(&gui.float_menu, Point{xpos,ypos}, options, n_options, &gui.regular_font, gui.window.width, gui.window.height, callback);
+    init_float_menu(&gui.float_menu, Point{xpos,ypos}, options, n_options, gui.window.width, gui.window.height, callback);
     gui.float_menu_is_open = true;
 }
 
@@ -287,6 +283,8 @@ void open_file()
     {
         gui.main_buffer = new_buffer_idx;
         compile_program(&gui.byte_code, filepath, true, &gui.dbginfo);
+        show_bytecode(&gui.bytecode_view, &gui.byte_code);
+        print_opcodes(gui.byte_code, &gui.dbginfo);
     }
 
     set_buffer(&gui.buffer_views[0], new_buffer_idx);

@@ -6,7 +6,12 @@
 FT_Library library;
 SDL_Color colors_white[256];
 
-bool init_fonts()
+Font regular;
+Font monospace;
+
+bool create_font(Font* font, Window* window, const char* filename, int size);
+
+bool init_fonts(Window* window)
 {
     if(FT_Init_FreeType(&library))
     {
@@ -21,6 +26,11 @@ bool init_fonts()
         colors_white[i].b = i;
         colors_white[i].a = i;
     }
+
+    if(!create_font(&regular, window, "ArialCEBold.ttf", 12))
+        return 0;
+    if(!create_font(&monospace, window, "UbuntuMono-Regular.ttf", 17))
+        return 0;
 
     return true;
 }
@@ -104,19 +114,19 @@ bool create_font(Font* font, Window* window, const char* filename, int size)
     return true;
 }
 
-void draw_text(Window* window, Font* font, const char* text, Point pos)
+void draw_text(Window* window, const Font* font, const char* text, Point pos)
 {
     draw_text(window, font, text, pos, '\0', COLOR_LIGHT);
 }
 
-void draw_text(Window* window, Font* font, const char* text, Point pos, char end_char, Color color)
+void draw_text(Window* window, const Font* font, const char* text, Point pos, char end_char, Color color)
 {
     int x_pos = pos.x;
     int y_pos = pos.y;
 
     while(*text != '\0' && *text != end_char)
     {
-        Character* character = font->characters+*text;
+        const Character* character = font->characters+*text;
         if(!character->is_valid)
         {
             text++;
@@ -140,7 +150,7 @@ void draw_text(Window* window, Font* font, const char* text, Point pos, char end
     }
 }
 
-void get_text_size(Font* font, const char* text, int* out_width, int* out_height)
+void get_text_size(const Font* font, const char* text, int* out_width, int* out_height)
 {
     int widht = 0;
     int top = 0;
@@ -150,7 +160,7 @@ void get_text_size(Font* font, const char* text, int* out_width, int* out_height
 
     while(*text != '\0')
     {
-        Character* character = font->characters+*text;
+        const Character* character = font->characters+*text;
 
         if(!character->is_valid)
             continue;
@@ -169,3 +179,6 @@ void get_text_size(Font* font, const char* text, int* out_width, int* out_height
     *out_width = widht;
     *out_height = top - bottom;
 }
+
+const Font* get_regular_font()  {return &regular;}
+const Font* get_monospace_font(){return &monospace;}

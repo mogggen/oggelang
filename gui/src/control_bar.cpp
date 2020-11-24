@@ -29,7 +29,6 @@ void ControlBar::draw(Window* window, Area* area)
 
 void open_file_button_callback(void* owner, void* data)
 {
-    Window* window = (Window*)data;
     printf("Open file button\n");
     open_file();
 }
@@ -44,9 +43,9 @@ void stop_button_callback(void* owner, void*)
     printf("Stop button\n");
 }
 
-void create_control_bar(Window* window, ControlBar* bar, Font* font)
+void create_control_bar(Window* window, ControlBar* bar)
 {
-    bar->buttons.font = font;
+    bar->buttons.font = get_regular_font();
     bar->buttons.callback_owner = bar;
 
     int x_pos = 2;

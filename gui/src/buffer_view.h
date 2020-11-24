@@ -4,17 +4,13 @@
 #include "view.h"
 #include "window.h"
 #include "buffer.h"
-#include "font.h"
 #include <vector>
-
-const int LINE_NUM_PADDING = 3;
 
 class BufferView : public View
 {
 public:
     int buffer_idx;
     Point pos;
-    Font* font;
     int line_num_width;
     int first_visible_line;
 
@@ -24,7 +20,7 @@ public:
     void draw(Window* window, Area* area);
 };
 
-void create_buffer_view(BufferView* view, Font* font);
+void create_buffer_view(BufferView* view);
 void set_buffer(BufferView* view, int buffer_idx);
 
 #endif /* BUFFER_VIEW_H */

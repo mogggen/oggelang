@@ -21,10 +21,12 @@ struct Font
     Character characters[256];
 };
 
-bool init_fonts();
-bool create_font(Font* font, Window* window, const char* filename, int size);
-void draw_text(Window* window, Font* font, const char* text, Point pos);
-void draw_text(Window* window, Font* font, const char* text, Point pos, char end_char, Color color);
-void get_text_size(Font* font, const char* text, int* out_width, int* out_height);
+bool init_fonts(Window* window);
+void draw_text(Window* window, const Font* font, const char* text, Point pos);
+void draw_text(Window* window, const Font* font, const char* text, Point pos, char end_char, Color color);
+void get_text_size(const Font* font, const char* text, int* out_width, int* out_height);
+
+const Font* get_regular_font();
+const Font* get_monospace_font();
 
 #endif

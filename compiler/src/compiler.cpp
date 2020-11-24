@@ -36,10 +36,10 @@ int compile_program(ByteCode* out_code, const char* filename, bool print_ast, De
     std::unordered_set<unsigned long> compiled_files; // set of all compiled files
     std::queue<const char*> compile_queue;
 
-    char filepath_buffer[1024]; // buffer for directory and filename
+    char filepath_buffer[2048]; // buffer for directory and filename
 
     // find directory
-    int last_slash = find_last_char(filename, '/');
+    int last_slash = find_last_char(filename, '\\');
     int directory_size;
     if(last_slash < 0)
     {
@@ -61,7 +61,7 @@ int compile_program(ByteCode* out_code, const char* filename, bool print_ast, De
 
         // create lexer
         LexerContext lexer;
-        if(!create_lexer(&lexer, filename, filepath_buffer, &symbol_names_alloc))
+        if(!create_lexer(&lexer, filepath_buffer, filepath_buffer, &symbol_names_alloc))
         {
             printf("Could not open file: %s\n", filepath_buffer);
             return 0;
@@ -100,7 +100,8 @@ int compile_program(ByteCode* out_code, const char* filename, bool print_ast, De
         // add dependent files to compile queue
         for(auto file : obj.dependent_files)
         {
-            auto search = compiled_files.find(hash_djb2(file));
+            strcpy(filepath_buffer+directory_size, file); // append filename to directory
+            auto search = compiled_files.find(hash_djb2(filepath_buffer));
             if(search == compiled_files.end())
             {
                 compile_queue.push(file);

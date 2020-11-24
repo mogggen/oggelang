@@ -13,6 +13,7 @@ add_library( gui
     src/view.cpp
     src/control_bar.cpp
     src/buffer_view.cpp
+    src/bytecode_view.cpp
     src/buffer.cpp
     src/float_menu.cpp
     src/file_util.cpp

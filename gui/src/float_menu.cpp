@@ -7,13 +7,13 @@ void button_callback(void* owner, void* data)
     menu->callback((int)data);
 }
 
-void init_float_menu(FloatMenu* menu, Point pos, const char** options, int n_options, Font* font, int win_width, int win_height, void(*callback)(int))
+void init_float_menu(FloatMenu* menu, Point pos, const char** options, int n_options, int win_width, int win_height, void(*callback)(int))
 {
     menu->options = options;
     menu->n_options = n_options;
     menu->callback = callback;
 
-    menu->buttons.font = font;
+    menu->buttons.font = get_regular_font();
     menu->buttons.callback_owner = menu;
     clear_buttons(&menu->buttons);
 
@@ -51,7 +51,7 @@ void init_float_menu(FloatMenu* menu, Point pos, const char** options, int n_opt
         menu->area.y = pos.y;
 }
 
-void draw_float_menu(Window* window, FloatMenu* menu, Font* font)
+void draw_float_menu(Window* window, FloatMenu* menu)
 {
     draw_rect_fill(window, COLOR_DARK, Point{menu->area.x+menu->area.width, menu->area.y+menu->area.height}, Point{menu->area.x, menu->area.y});
 

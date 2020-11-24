@@ -20,7 +20,7 @@ public:
     void draw(Window* window, Area* area);
 };
 
-void create_control_bar(Window* window, ControlBar* bar, Font* font);
+void create_control_bar(Window* window, ControlBar* bar);
 void draw_control_bar(Window* window, ControlBar* bar);
 
 #endif /* CONTROL_BAR_H */
