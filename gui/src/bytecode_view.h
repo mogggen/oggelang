@@ -23,6 +23,8 @@ public:
     void mouse_scroll_update(int scroll, Point mouse_pos);
 
     void draw(Window* window, Area* area);
+    
+    const char* name() const {return "Bytecode";};
 };
 
 void create_bytecode_view(ByteCodeView* view);

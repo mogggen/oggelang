@@ -11,6 +11,7 @@ add_library( gui
     src/window.cpp
     src/buttons.cpp
     src/view.cpp
+    src/view_select.cpp
     src/control_bar.cpp
     src/buffer_view.cpp
     src/bytecode_view.cpp
@@ -22,8 +23,6 @@ add_library( gui
 file( COPY ${CMAKE_CURRENT_SOURCE_DIR}/deps/SDL2-2.0.12/lib/x64/SDL2.dll 
     DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY} )
 
-set( SDL2_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/deps/SDL2-2.0.12/include )
-set( FREETYPE_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/deps/freetype-2.10.4/include )
 include_directories( ${include_dirs} ${SDL2_INCLUDE_DIR} ${FREETYPE_INCLUDE_DIR} )
 
 

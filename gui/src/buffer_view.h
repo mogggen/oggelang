@@ -18,6 +18,8 @@ public:
     void mouse_left_click(Point mouse_pos);
 
     void draw(Window* window, Area* area);
+
+    const char* name() const {return "Buffer";};
 };
 
 void create_buffer_view(BufferView* view);

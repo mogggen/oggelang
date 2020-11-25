@@ -12,6 +12,8 @@ public:
     virtual void mouse_enter(Point mouse_pos) {}
     
     virtual void draw(Window* window, Area* area) = 0;
+
+    virtual const char* name() const {return "no-name";};
 };
 
 class HSplit : public View
@@ -47,22 +49,6 @@ public:
     VSplit(View* left, View* right, int split_width);
 
     void mouse_scroll_update(int scroll, Point mouse_pos); 
-    void mouse_left_click(Point mouse_pos);
-    void mouse_right_click(Point mouse_pos);
-    void mouse_enter(Point mouse_pos);
-    
-    void draw(Window* window, Area* area);
-};
-
-class ViewSelect : public View
-{
-public:
-    View* inner;
-    Area button_area;
-    
-    ViewSelect(View* inner);
-    
-    void mouse_scroll_update(int scroll, Point mouse_pos);
     void mouse_left_click(Point mouse_pos);
     void mouse_right_click(Point mouse_pos);
     void mouse_enter(Point mouse_pos);

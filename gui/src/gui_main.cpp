@@ -9,6 +9,7 @@
 #include "buttons.h"
 #include "font.h"
 #include "view.h"
+#include "view_select.h"
 #include "control_bar.h"
 #include "buffer_view.h"
 #include "bytecode_view.h"
@@ -21,12 +22,6 @@
 #include "opcodes.h"
 #include "compiler.h"
 
-#define allocate_new(dest, alloc, type, construct) {\
-    dest = (type *)allocate(alloc, sizeof( type ));\
-    type _t = construct;\
-    memcpy(dest, &_t, sizeof( type ));\
-}
-
 struct Gui
 {
     BlockAlloc alloc;
@@ -34,7 +29,7 @@ struct Gui
 
     ControlBar control_bar;
     ByteCodeView bytecode_view;
-    BufferView buffer_views[2];
+    View* selectable_views[N_SELECTABLE_VIEWS];
     View* views;
 
     bool float_menu_is_open = false;
@@ -85,20 +80,14 @@ int init_gui(Gui* gui)
     // init views
     create_control_bar(&gui->window, &gui->control_bar);
     create_bytecode_view(&gui->bytecode_view);
-    for(int i=0; i<2; i++)
-        create_buffer_view(&gui->buffer_views[i]);
+
+    gui->selectable_views[0] = &gui->bytecode_view;
 
 
-    ViewSelect* select1;
-    ViewSelect* select2;
-    VSplit* split2;
-    HSplit* split1;
-
-    allocate_new(select1, gui->alloc, ViewSelect, ViewSelect((View*)&gui->buffer_views[0]))
-    allocate_new(select2, gui->alloc, ViewSelect, ViewSelect((View*)&gui->bytecode_view))
-    
-    allocate_new(split2, gui->alloc, VSplit, VSplit((View*)select1, (View*)select2, 0.5f))
-    allocate_new(split1, gui->alloc, HSplit, HSplit((View*)&gui->control_bar, (View*)split2, CONTROL_BAR_HEIGHT))
+    ViewSelect* select1 = allocate_assign(gui->alloc, ViewSelect());
+    ViewSelect* select2 = allocate_assign(gui->alloc, ViewSelect((View*)&gui->bytecode_view));
+    VSplit* split2 = allocate_assign(gui->alloc, VSplit((View*)select1, (View*)select2, 0.5f));
+    HSplit* split1 = allocate_assign(gui->alloc, HSplit((View*)&gui->control_bar, (View*)split2, CONTROL_BAR_HEIGHT));
 
     gui->views = (View*)split1;
 
@@ -260,7 +249,7 @@ void open_file()
     {
         if(b.filepath_hash == filepath_hash)
         {
-            set_buffer(&gui.buffer_views[0], i);
+            //set_buffer(&gui.buffer_views[0], i);
             return;
         }
         i++;
@@ -287,5 +276,11 @@ void open_file()
         print_opcodes(gui.byte_code, &gui.dbginfo);
     }
 
-    set_buffer(&gui.buffer_views[0], new_buffer_idx);
+    // TODO selected buffer maybe????  
+    //set_buffer(&gui.buffer_views[0], new_buffer_idx); 
+}
+
+View** get_selectable_views()
+{
+    return (View**)gui.selectable_views;
 }
