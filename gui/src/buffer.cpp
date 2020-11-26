@@ -58,19 +58,22 @@ void buffer_from_source_file(Buffer* buffer, const char* filepath)
     load_file(buffer, filepath);
 }
 
-void reload_buffer(Buffer* buffer)
+bool reload_buffer(Buffer* buffer)
 {
     long long modified_time = get_last_modified_time(buffer->filepath);
     if(modified_time == 0)
     {
         printf("Cannot reload file %s\n", buffer->filepath);
-        return;
+        return false;
     }
 
     if(modified_time > buffer->last_modified_time)
     {
         load_file(buffer, buffer->filepath);
+        return true;
     }
+
+    return false;
 }
 
 void close_buffer(Buffer* buffer)

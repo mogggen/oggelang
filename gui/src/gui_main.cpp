@@ -81,17 +81,24 @@ int init_gui(Gui* gui)
     gui->selectable_views[0] = &gui->bytecode_view;
 
 
-    ViewSelect* select1 = allocate_assign(gui->alloc, ViewSelect());
-    ViewSelect* select2 = allocate_assign(gui->alloc, ViewSelect());
-    create_view_select(select1);
-    create_view_select(select2, &gui->bytecode_view);
+    ViewSelect* select_right = allocate_assign(gui->alloc, ViewSelect());
+    ViewSelect* select_left = allocate_assign(gui->alloc, ViewSelect());
+    create_view_select(select_right, &gui->bytecode_view);
+    create_view_select(select_left);
 
-    VSplit* split2 = allocate_assign(gui->alloc, VSplit((View*)select1, (View*)select2, 0.5f));
+    VSplit* split2 = allocate_assign(gui->alloc, VSplit((View*)select_left, (View*)select_right, 0.5f));
     HSplit* split1 = allocate_assign(gui->alloc, HSplit((View*)&gui->control_bar, (View*)split2, CONTROL_BAR_HEIGHT));
 
     gui->views = (View*)split1;
 
     return 1;
+}
+
+void compile(int main_buffer_idx)
+{
+    compile_program(&gui.byte_code, gui.buffers[main_buffer_idx].filepath, true, &gui.dbginfo);
+    show_bytecode(&gui.bytecode_view, &gui.byte_code);
+    print_opcodes(gui.byte_code, &gui.dbginfo);
 }
 
 int gui_main()
@@ -126,8 +133,13 @@ int gui_main()
 
     while(running)
     {
+        int n_reloaded_buffers = 0;
         for(Buffer& b: gui.buffers)
-            reload_buffer(&b);
+            n_reloaded_buffers += reload_buffer(&b);
+
+        if(n_reloaded_buffers > 0)
+            compile(gui.main_buffer);
+
 
         SDL_SetRenderDrawColor(gui.window.renderer, 40,40,40,0);
         SDL_RenderClear(gui.window.renderer);
@@ -238,7 +250,7 @@ void open_file()
     {
         if(b.filepath_hash == filepath_hash)
         {
-            //set_buffer(&gui.buffer_views[0], i);
+            set_buffer(get_selected_buffer_view(), i); 
             return;
         }
         i++;
@@ -260,13 +272,10 @@ void open_file()
     if( gui.main_buffer < 0 )
     {
         gui.main_buffer = new_buffer_idx;
-        compile_program(&gui.byte_code, filepath, true, &gui.dbginfo);
-        show_bytecode(&gui.bytecode_view, &gui.byte_code);
-        print_opcodes(gui.byte_code, &gui.dbginfo);
+        compile(new_buffer_idx);
     }
 
-    // TODO selected buffer maybe????  
-    //set_buffer(&gui.buffer_views[0], new_buffer_idx); 
+    set_buffer(get_selected_buffer_view(), new_buffer_idx); 
 }
 
 View** get_selectable_views()

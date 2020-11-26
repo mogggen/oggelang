@@ -8,6 +8,8 @@
 
 const int LINE_NUM_PADDING = 3;
 
+static BufferView* selected_buffer_view;
+
 void BufferView::mouse_scroll_update(int scroll, Point mouse_pos)
 {
     if(this->buffer_idx < 0)
@@ -22,33 +24,39 @@ void BufferView::mouse_scroll_update(int scroll, Point mouse_pos)
         this->first_visible_line = (long)buffer.lines.size()-1;
 }
 
-BufferView* selected_buffer_view;
-
 void select_buffer_menu_callback(int i)
 {
-
     set_buffer(selected_buffer_view, i);
 }
-
 const char* select_buffer_options[16];
-void BufferView::mouse_left_click(Point mouse_pos)
+
+void open_select_buffer_menu(BufferView* view, Point pos)
 {
-    if(mouse_pos.y < this->pos.y + get_monospace_font()->size) // if clicked on top bar
+    int i = 0;
+    for(const Buffer& b: get_buffers())
     {
-        selected_buffer_view = this; 
-
-        int i = 0;
-        for(const Buffer& b: get_buffers())
-        {
-            select_buffer_options[i] = b.filename;
-            i++;
-            if(i>16)
-                break;
-        }
-
-        open_float_menu(mouse_pos.x, mouse_pos.y, select_buffer_options, i, select_buffer_menu_callback);
+        select_buffer_options[i] = b.filename;
+        i++;
+        if(i>16)
+            break;
     }
 
+    open_float_menu(pos.x, pos.y, select_buffer_options, i, select_buffer_menu_callback);
+}
+
+void BufferView::mouse_left_click(Point mouse_pos)
+{
+    selected_buffer_view = this; 
+    if(mouse_pos.y < this->pos.y + get_monospace_font()->size) // if clicked on top bar
+    {
+        open_select_buffer_menu(this, mouse_pos);
+    }
+}
+
+void BufferView::mouse_right_click(Point mouse_pos)
+{
+    selected_buffer_view = this; 
+    open_select_buffer_menu(this, mouse_pos);
 }
 
 void BufferView::draw(Window* window, Area* area)
@@ -97,6 +105,7 @@ void create_buffer_view(BufferView* view)
 {
     view->buffer_idx = -1;
     view->line_num_width = 0;
+    selected_buffer_view = view; 
 }
 
 void set_buffer(BufferView* view, int buffer_idx)
@@ -118,4 +127,9 @@ void set_buffer(BufferView* view, int buffer_idx)
     
     view->line_num_width = n_digits * char_width;
     view->first_visible_line = 0;
+}
+
+BufferView* get_selected_buffer_view()
+{
+    return selected_buffer_view;
 }

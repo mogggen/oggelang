@@ -16,6 +16,7 @@ public:
 
     void mouse_scroll_update(int scroll, Point mouse_pos);
     void mouse_left_click(Point mouse_pos);
+    void mouse_right_click(Point mouse_pos);
 
     void draw(Window* window, Area* area);
 
@@ -24,5 +25,7 @@ public:
 
 void create_buffer_view(BufferView* view);
 void set_buffer(BufferView* view, int buffer_idx);
+
+BufferView* get_selected_buffer_view();
 
 #endif /* BUFFER_VIEW_H */

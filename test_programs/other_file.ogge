@@ -1,6 +1,6 @@
 var C = 42
 print C
-var A = 3
-print A
+var B = C + 2
+print C
 
 goto new.ogge:8

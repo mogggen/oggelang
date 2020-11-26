@@ -80,7 +80,6 @@ void show_bytecode(ByteCodeView* view, ByteCode* byte_code)
     get_text_size(font, c, &char_width, &char_height);
 
     view->line_num_width = n_digits * char_width;
-    view->first_visible_line = 0;
 
     int pc = 0;
     while(pc < byte_code->code_size)

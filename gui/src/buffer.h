@@ -17,6 +17,6 @@ struct Buffer
 
 void buffer_from_source_file(Buffer* buffer, const char* filename);
 void close_buffer(Buffer* buffer);
-void reload_buffer(Buffer* buffer);
+bool reload_buffer(Buffer* buffer);
 
 #endif /* BUFFER_H */
