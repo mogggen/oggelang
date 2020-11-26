@@ -32,9 +32,6 @@ struct Gui
     View* selectable_views[N_SELECTABLE_VIEWS];
     View* views;
 
-    bool float_menu_is_open = false;
-    FloatMenu float_menu;
-
     int main_buffer = -1;
 
     ByteCode byte_code;
@@ -85,7 +82,10 @@ int init_gui(Gui* gui)
 
 
     ViewSelect* select1 = allocate_assign(gui->alloc, ViewSelect());
-    ViewSelect* select2 = allocate_assign(gui->alloc, ViewSelect((View*)&gui->bytecode_view));
+    ViewSelect* select2 = allocate_assign(gui->alloc, ViewSelect());
+    create_view_select(select1);
+    create_view_select(select2, &gui->bytecode_view);
+
     VSplit* split2 = allocate_assign(gui->alloc, VSplit((View*)select1, (View*)select2, 0.5f));
     HSplit* split1 = allocate_assign(gui->alloc, HSplit((View*)&gui->control_bar, (View*)split2, CONTROL_BAR_HEIGHT));
 
@@ -135,8 +135,8 @@ int gui_main()
         //draw_buffer_view(&window, &buffer_view, &area2);
         Area window_area = Area{0,0,gui.window.width, gui.window.height};
         gui.views->draw(&gui.window, &window_area);
-        if(gui.float_menu_is_open)
-            draw_float_menu(&gui.window, &gui.float_menu);
+        if(is_float_menu_open())
+            draw_float_menu(&gui.window);
         //SDL_RenderCopy(window.renderer, texture, nullptr, &texture_rect);
 
         SDL_RenderPresent(gui.window.renderer);
@@ -159,10 +159,9 @@ int gui_main()
                } break;
             case SDL_MOUSEBUTTONDOWN:
                {
-                   if(gui.float_menu_is_open)
+                   if(is_float_menu_open())
                    {
-                       mouse_click(&gui.float_menu, mouse_pos);
-                       gui.float_menu_is_open = false;
+                       float_menu_mouse_click(mouse_pos);
                    }
                    else switch(event.button.button)
                    {
@@ -177,8 +176,8 @@ int gui_main()
             case SDL_MOUSEMOTION:
                {
                    mouse_pos = {event.button.x, event.button.y};
-                   if(gui.float_menu_is_open)
-                       mouse_enter(&gui.float_menu, mouse_pos);
+                   if(is_float_menu_open())
+                       float_menu_mouse_enter(mouse_pos);
                    else
                        gui.views->mouse_enter(mouse_pos);
                } break;
@@ -209,16 +208,6 @@ int gui_main()
     return 0;
 }
 
-
-
-void open_float_menu(int xpos, int ypos, const char** options, int n_options, void(*callback)(int))
-{
-    if(gui.float_menu_is_open)
-        return;
-
-    init_float_menu(&gui.float_menu, Point{xpos,ypos}, options, n_options, gui.window.width, gui.window.height, callback);
-    gui.float_menu_is_open = true;
-}
 
 Buffer& get_buffer(int buffer_idx)
 {

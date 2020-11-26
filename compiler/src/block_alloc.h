@@ -25,7 +25,7 @@ T* allocate_assign(BlockAlloc& alloc, T obj)
 {
     T* d = (T*)allocate(alloc, sizeof(T));
     memcpy(d, &obj, sizeof(T)); // memcpy to copy virtual table
-    *d = obj; // call to copy constructor
+    *d = T(obj); // call to copy constructor
     return d;
 }
 

@@ -5,23 +5,12 @@
 #include "font.h"
 #include "buttons.h"
 
-const int FLOAT_MENU_PADDING = 3;
 
-struct FloatMenu
-{
-    const char** options;
-    int n_options;
-    Area area; 
-    int option_height;
+void draw_float_menu(Window* window);
+void float_menu_mouse_enter(Point mouse_pos);
+void float_menu_mouse_click(Point mouse_pos);
 
-    ButtonGroup buttons;
-
-    void (*callback)(int);
-};
-
-void init_float_menu(FloatMenu* menu, Point pos, const char** options, int n_options, int win_width, int win_height, void(*callback)(int));
-void draw_float_menu(Window* window, FloatMenu* menu);
-void mouse_enter(FloatMenu* menu, Point mouse_pos);
-void mouse_click(FloatMenu* menu, Point mouse_pos);
+void open_float_menu(int xpos, int ypos, const char** options, int n_options, void(*callback)(int));
+bool is_float_menu_open();
 
 #endif /* FLOAT_MENU_H */

@@ -25,8 +25,6 @@ file( COPY ${CMAKE_CURRENT_SOURCE_DIR}/deps/SDL2-2.0.12/lib/x64/SDL2.dll
 
 include_directories( ${include_dirs} ${SDL2_INCLUDE_DIR} ${FREETYPE_INCLUDE_DIR} )
 
-
-set_property(TARGET gui PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
 message(${CMAKE_SOURCE_DIR})
 
 target_link_libraries( gui 

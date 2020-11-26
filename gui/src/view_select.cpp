@@ -1,27 +1,17 @@
 #include "view_select.h"
 #include <stdio.h>
 #include "gui_main.h"
+#include "float_menu.h"
 
-ViewSelect::ViewSelect()
+void create_view_select(ViewSelect* view)
 {
-    create_buffer_view(&this->buffer_view);
-    this->inner = &this->buffer_view;
+    create_buffer_view(&view->buffer_view);
+    view->inner = &view->buffer_view;
 }
-    
-ViewSelect::ViewSelect(View* inner)
-    : ViewSelect()
+void create_view_select(ViewSelect* view, View* inner)
 {
-    this->inner = inner;
-}
-
-ViewSelect::ViewSelect(ViewSelect& other)
-{
-    if(other.inner == &other.buffer_view)
-        this->inner = &this->buffer_view;
-    else
-        this->inner = other.inner;
-    this->button_area = other.button_area;
-    this->buffer_view = other.buffer_view;
+    create_view_select(view);
+    view->inner = inner;
 }
 
 void ViewSelect::mouse_scroll_update(int scroll, Point mouse_pos)

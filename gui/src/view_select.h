@@ -12,9 +12,6 @@ public:
 
     BufferView buffer_view;
     
-    ViewSelect();
-    ViewSelect(View* inner);
-    ViewSelect(ViewSelect& other);
     
     void mouse_scroll_update(int scroll, Point mouse_pos);
     void mouse_left_click(Point mouse_pos);
@@ -23,5 +20,8 @@ public:
     
     void draw(Window* window, Area* area);
 };
+    
+void create_view_select(ViewSelect* view);
+void create_view_select(ViewSelect* view, View* inner);
 
 #endif /* VIEW_SELECT_H */

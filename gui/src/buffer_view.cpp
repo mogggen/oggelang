@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include "gui_main.h"
 #include "font.h"
+#include "float_menu.h"
 
 const int LINE_NUM_PADDING = 3;
 
