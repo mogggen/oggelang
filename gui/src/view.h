@@ -9,6 +9,8 @@ public:
     virtual void mouse_scroll_update(int scroll, Point mouse_pos) {}
     virtual void mouse_left_click(Point mouse_pos) {}
     virtual void mouse_right_click(Point mouse_pos) {}
+    virtual void mouse_left_release(Point mouse_pos) {};
+    virtual void mouse_right_release(Point mouse_pos) {};
     virtual void mouse_enter(Point mouse_pos) {}
     
     virtual void draw(Window* window, Area* area) = 0;
@@ -31,6 +33,8 @@ public:
     void mouse_scroll_update(int scroll, Point mouse_pos); 
     void mouse_left_click(Point mouse_pos);
     void mouse_right_click(Point mouse_pos);
+    void mouse_left_release(Point mouse_pos);
+    void mouse_right_release(Point mouse_pos);
     void mouse_enter(Point mouse_pos);
     
     void draw(Window* window, Area* area);
@@ -43,14 +47,19 @@ public:
     View* right;
     int split_width;
     bool absolut;
-    float width;
+    float percent_width;
+    int width;
+    
+    bool being_resized =  false;
 
-    VSplit(View* left, View* right, float width);
+    VSplit(View* left, View* right, float percent_width);
     VSplit(View* left, View* right, int split_width);
 
     void mouse_scroll_update(int scroll, Point mouse_pos); 
     void mouse_left_click(Point mouse_pos);
     void mouse_right_click(Point mouse_pos);
+    void mouse_left_release(Point mouse_pos);
+    void mouse_right_release(Point mouse_pos);
     void mouse_enter(Point mouse_pos);
     
     void draw(Window* window, Area* area);

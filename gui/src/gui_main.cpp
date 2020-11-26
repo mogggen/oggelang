@@ -82,11 +82,14 @@ int init_gui(Gui* gui)
 
 
     ViewSelect* select_right = allocate_assign(gui->alloc, ViewSelect());
+    ViewSelect* select_middle = allocate_assign(gui->alloc, ViewSelect());
     ViewSelect* select_left = allocate_assign(gui->alloc, ViewSelect());
     create_view_select(select_right, &gui->bytecode_view);
+    create_view_select(select_middle);
     create_view_select(select_left);
 
-    VSplit* split2 = allocate_assign(gui->alloc, VSplit((View*)select_left, (View*)select_right, 0.5f));
+    VSplit* split3 = allocate_assign(gui->alloc, VSplit((View*)select_middle, (View*)select_right, 0.666));
+    VSplit* split2 = allocate_assign(gui->alloc, VSplit((View*)select_left, (View*)split3, 0.333f));
     HSplit* split1 = allocate_assign(gui->alloc, HSplit((View*)&gui->control_bar, (View*)split2, CONTROL_BAR_HEIGHT));
 
     gui->views = (View*)split1;
@@ -181,6 +184,14 @@ int gui_main()
                        case SDL_BUTTON_RIGHT: gui.views->mouse_right_click(mouse_pos); break;
                    }
                } break;
+            case SDL_MOUSEBUTTONUP:
+               { 
+                   switch(event.button.button)
+                   {
+                       case SDL_BUTTON_LEFT:  gui.views->mouse_left_release(mouse_pos); break;
+                       case SDL_BUTTON_RIGHT: gui.views->mouse_right_release(mouse_pos); break;
+                   }
+               }
             case SDL_MOUSEWHEEL:
                {
                    gui.views->mouse_scroll_update(event.wheel.y, mouse_pos);

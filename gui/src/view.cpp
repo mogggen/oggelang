@@ -31,6 +31,20 @@ void HSplit::mouse_right_click(Point mouse_pos)
     else
         bottom->mouse_right_click(mouse_pos);
 }
+void HSplit::mouse_left_release(Point mouse_pos)
+{
+    if(mouse_pos.y < this->split_height)
+        top->mouse_left_release(mouse_pos);
+    else
+        bottom->mouse_left_release(mouse_pos);
+}
+void HSplit::mouse_right_release(Point mouse_pos)
+{
+    if(mouse_pos.y < this->split_height)
+        top->mouse_right_release(mouse_pos);
+    else
+        bottom->mouse_right_release(mouse_pos);
+}
 void HSplit::mouse_enter(Point mouse_pos)
 {
     if(mouse_pos.y < this->split_height)
@@ -54,11 +68,15 @@ void HSplit::draw(Window* window, Area* area)
     draw_line(window, COLOR_LIGHT, Point{area->x, this->split_height}, Point{area->x+area->width, this->split_height});
 }
 
-VSplit::VSplit(View* left, View* right, float width)
-    : left(left), right(right), split_width(0), absolut(false), width(width)
+
+
+
+
+VSplit::VSplit(View* left, View* right, float percent_width)
+    : left(left), right(right), split_width(0), absolut(false), percent_width(percent_width)
 { }
 VSplit::VSplit(View* left, View* right, int split_width)
-    : left(left), right(right), split_width(split_width), absolut(true), width(0.0)
+    : left(left), right(right), split_width(split_width), absolut(true), percent_width(0.0)
 { }
 
 void VSplit::mouse_scroll_update(int scroll, Point mouse_pos)
@@ -71,7 +89,9 @@ void VSplit::mouse_scroll_update(int scroll, Point mouse_pos)
 
 void VSplit::mouse_left_click(Point mouse_pos)
 {
-    if(mouse_pos.x < this->split_width)
+    if(this->split_width-2 <= mouse_pos.x && mouse_pos.x <= this->split_width+2)
+        this->being_resized = true;
+    else if(mouse_pos.x < this->split_width)
         left->mouse_left_click(mouse_pos);
     else
         right->mouse_left_click(mouse_pos);
@@ -83,17 +103,50 @@ void VSplit::mouse_right_click(Point mouse_pos)
     else
         right->mouse_right_click(mouse_pos);
 }
-void VSplit::mouse_enter(Point mouse_pos)
+void VSplit::mouse_left_release(Point mouse_pos)
+{
+    if(this->being_resized)
+        this->being_resized = false;
+    else
+    {
+        if(mouse_pos.x < this->split_width)
+            left->mouse_left_release(mouse_pos);
+        else
+            right->mouse_left_release(mouse_pos);
+    }
+}
+void VSplit::mouse_right_release(Point mouse_pos)
 {
     if(mouse_pos.x < this->split_width)
-        left->mouse_enter(mouse_pos);
+        left->mouse_right_release(mouse_pos);
     else
-        right->mouse_enter(mouse_pos);
+        right->mouse_right_release(mouse_pos);
+}
+void VSplit::mouse_enter(Point mouse_pos)
+{
+    if(this->being_resized)
+    {
+        int diff = mouse_pos.x - this->split_width;
+        if(this->absolut)
+            this->split_width += diff;
+        else
+            this->percent_width += (float)diff/(float)this->width;
+    }
+    else
+    {
+        if(mouse_pos.x < this->split_width)
+            left->mouse_enter(mouse_pos);
+        else
+            right->mouse_enter(mouse_pos);
+    }
 }
 void VSplit::draw(Window* window, Area* area)
 {
     if(!this->absolut)
-        this->split_width = area->width*this->width;
+    {
+        this->split_width = area->width*this->percent_width;
+        this->width = window->width;
+    }
 
     Area aleft = *area;
     aleft.width = this->split_width - aleft.x;
