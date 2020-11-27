@@ -231,6 +231,7 @@ int gui_main()
     SDL_Quit();
 
 
+    dealloc(gui.dbginfo.symbol_names_alloc);
     dealloc(gui.alloc);
     return 0;
 }
