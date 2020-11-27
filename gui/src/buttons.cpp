@@ -46,12 +46,11 @@ void draw_buttons(ButtonGroup* group, Window* window, Point pos)
 
     for(auto b : group->buttons)
     {
-        Point max = Point{pos.x + b.right, pos.y + b.bottom};
-        Point min = Point{pos.x + b.left, pos.y + b.top};
+        Area a = Area{pos.x+b.left, pos.y+b.top, b.right-b.left, b.bottom-b.top};
         if(b.is_hovered)
-            draw_rect_fill(window, COLOR_NEUTRAL_GREEN, max, min);
+            draw_rect_fill(window, COLOR_NEUTRAL_GREEN, a);
         if(b.border)
-            draw_rect(window, COLOR_LIGHT, max, min);
+            draw_rect(window, COLOR_LIGHT, a);
         draw_text(window, group->font, b.text, Point{pos.x + b.left+b.text_offset.x, pos.y + b.top+b.text_offset.y});
     }
 }

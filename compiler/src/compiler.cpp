@@ -114,14 +114,17 @@ int compile_program(ByteCode* out_code, const char* filename, bool print_ast, De
     {
         if(!link(compiled_objects, out_code))
             return 0;
+        dealloc(symbol_names_alloc);
     }
     else
     {
+        dealloc(out_dbginfo->symbol_names_alloc);
+
         if(!link_debug(compiled_objects, out_code, out_dbginfo))
             return 0;
+        out_dbginfo->symbol_names_alloc = symbol_names_alloc;
     }
 
-    dealloc(symbol_names_alloc);
 
     return 1;
 }

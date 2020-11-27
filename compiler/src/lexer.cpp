@@ -19,7 +19,12 @@ bool create_lexer(LexerContext* ctx, const char* filename, const char* path, Blo
     if(ctx->file == nullptr)
         return false;
 
-    ctx->loc = FileLocation{filename, 1, 1};
+    // move filename to allocated space
+    int filename_len = strlen(filename)+1; // +1 for nullterminator
+    char* name = (char*)allocate(*symbol_names_alloc, filename_len);
+    memcpy(name, filename, filename_len);
+
+    ctx->loc = FileLocation{name, 1, 1};
     ctx->symbol_names_alloc = symbol_names_alloc;
 
     fetch_token(*ctx); // get current_token

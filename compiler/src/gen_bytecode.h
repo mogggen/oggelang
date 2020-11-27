@@ -12,12 +12,18 @@ struct AddrLinenum
     int line_num;
 };
 
+struct VarNameLoc
+{
+    const char* name;
+    FileLocation loc;
+};
+
 struct CompiledObj
 {
     std::vector<int> code;
     int nr_variables;
     std::vector<int> var_addr; //addresses which values are pointers to variables
-    std::vector<const char*> var_names;
+    std::vector<VarNameLoc> var_names;
     std::vector<int> program_line_num;
     std::vector<AddrLinenum> goto_addr;
     const char* filename;

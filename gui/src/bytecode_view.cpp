@@ -19,15 +19,15 @@ void ByteCodeView::draw(Window* window, Area* area)
     auto font = get_monospace_font();
 
     this->pos = {area->x, area->y};
-    int text_xpos = area->x + this->line_num_width + 2*LINE_NUM_PADDING;
-    int line_num_xpos = area->x + LINE_NUM_PADDING;
-    int y_pos = area->y + font->size*1;
+    int text_xpos = this->line_num_width + 2*LINE_NUM_PADDING;
+    int line_num_xpos = LINE_NUM_PADDING;
+    int y_pos = font->size*1;
 
     // fill background
-    draw_rect_fill(window, COLOR_DARK, Point{area->x+area->width, area->y+area->height}, Point{area->x, area->y});
+    draw_rect_fill(window, COLOR_DARK, *area);
     
     // draw line number bar
-    draw_rect_fill(window, COLOR_DARK2, Point{text_xpos, area->y + area->height}, Point{area->x, area->y});
+    draw_rect_fill(window, COLOR_DARK2, Area{area->x, area->y, text_xpos, area->height});
 
     if(this->has_bytecode)
     {
@@ -37,14 +37,14 @@ void ByteCodeView::draw(Window* window, Area* area)
         {
             char* line = this->lines[i];
             sprintf(num_string, "%d", this->addresses[i]);
-            draw_text(window, font, num_string, Point{line_num_xpos, y_pos}, '\0', COLOR_BRIGHT_BLUE); // draw line number
-            draw_text(window, font, line, Point{text_xpos, y_pos}, '\n', COLOR_LIGHT); // draw text
+            draw_text(window, font, num_string, this->pos + Point{line_num_xpos, y_pos}, '\0', COLOR_BRIGHT_BLUE); // draw line number
+            draw_text(window, font, line, this->pos + Point{text_xpos, y_pos}, '\n', COLOR_LIGHT); // draw text
             y_pos += font->size;
         }
     }
     else
     {
-        draw_text(window, font, "No project loaded.", Point{text_xpos, y_pos}, '\0', COLOR_LIGHT);
+        draw_text(window, font, "No project loaded.", this->pos + Point{text_xpos, y_pos}, '\0', COLOR_LIGHT);
     }
 }
 

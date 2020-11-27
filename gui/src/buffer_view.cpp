@@ -32,6 +32,9 @@ const char* select_buffer_options[16];
 
 void open_select_buffer_menu(BufferView* view, Point pos)
 {
+    if(get_buffers().size() <= 0)
+        return;
+
     int i = 0;
     for(const Buffer& b: get_buffers())
     {
@@ -64,29 +67,29 @@ void BufferView::draw(Window* window, Area* area)
     auto font = get_monospace_font();
 
     this->pos = {area->x, area->y};
-    int text_xpos = area->x + this->line_num_width + 2*LINE_NUM_PADDING;
-    int line_num_xpos = area->x + LINE_NUM_PADDING;
-    int y_pos = area->y + font->size*2;
+    int text_xpos = this->line_num_width + 2*LINE_NUM_PADDING;
+    int line_num_xpos = LINE_NUM_PADDING;
+    int y_pos = font->size*2;
 
     // fill background
-    draw_rect_fill(window, COLOR_DARK, Point{area->x+area->width, area->y+area->height}, Point{area->x, area->y});
+    draw_rect_fill(window, COLOR_DARK, *area);
     
     // draw line number bar
-    draw_rect_fill(window, COLOR_DARK2, Point{text_xpos, area->y + area->height}, Point{area->x, area->y});
+    draw_rect_fill(window, COLOR_DARK2, Area{area->x, area->y, text_xpos, area->height});
     
     // draw top bar
-    draw_rect_fill(window, COLOR_DARK2, Point{area->x + area->width, area->y + font->size}, Point{area->x, area->y});
+    draw_rect_fill(window, COLOR_DARK2, Area{area->x, area->y, area->width, font->size});
 
     if(this->buffer_idx < 0)
     {
-        draw_text(window, font, "Open a file (Ctrl-O) or", Point{text_xpos, y_pos}, '\0', COLOR_LIGHT);
-        draw_text(window, font, "select an open file (Right Click)", Point{text_xpos, y_pos + font->size}, '\0', COLOR_LIGHT);
+        draw_text(window, font, "Open a file (Ctrl-O) or", this->pos+Point{text_xpos, y_pos}, '\0', COLOR_LIGHT);
+        draw_text(window, font, "select an open file (Right Click)", this->pos+Point{text_xpos, y_pos + font->size}, '\0', COLOR_LIGHT);
     }
     else
     {
         Buffer& buffer = get_buffer(this->buffer_idx);
         // draw filename
-        draw_text(window, font, buffer.filename, Point{area->x, area->y + font->size - 3});
+        draw_text(window, font, buffer.filename, this->pos + Point{0, font->size - 3});
 
         // draw content
         char num_string[16];
@@ -94,8 +97,8 @@ void BufferView::draw(Window* window, Area* area)
         {
             char* line = buffer.lines[i];
             sprintf(num_string, "%d", i+1);
-            draw_text(window, font, num_string, Point{line_num_xpos, y_pos}, '\0', COLOR_BRIGHT_BLUE); // draw line number
-            draw_text(window, font, line, Point{text_xpos, y_pos}, '\n', COLOR_LIGHT); // draw text
+            draw_text(window, font, num_string, this->pos+Point{line_num_xpos, y_pos}, '\0', COLOR_BRIGHT_BLUE); // draw line number
+            draw_text(window, font, line, this->pos+Point{text_xpos, y_pos}, '\n', COLOR_LIGHT); // draw text
             y_pos += font->size;
         }
     }

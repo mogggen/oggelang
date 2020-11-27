@@ -80,10 +80,11 @@ void ViewSelect::draw(Window* window, Area* area)
 {
     inner->draw(window, area);
     button_area = Area{
-        area->width-15,
+        area->x + area->width-15,
         area->y+5,
         10,
         10
     };
-    draw_rect_fill(window, COLOR_BRIGHT_PURPLE, Point{button_area.x + button_area.width, button_area.y + button_area.height}, Point{button_area.x, button_area.y});
+    draw_rect_fill(window, COLOR_FADED_BLUE, button_area);
+    draw_rect(window, COLOR_LIGHT, button_area);
 }

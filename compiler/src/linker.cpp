@@ -74,7 +74,7 @@ int link_debug(std::vector<CompiledObj>& compiled_objects, ByteCode* code, Debug
 
         // debug var names
         for(int i=0; i<co.nr_variables; i++)
-            dbginfo->variables[variable_offset+i] = DebugVar{co.var_names[i], var_start_idx+variable_offset+i}; // location not implemented yet
+            dbginfo->variables[variable_offset+i] = DebugVar{co.var_names[i].name, var_start_idx+variable_offset+i, co.var_names[i].loc};
 
         // debug line num
         for(int i=0; i<co.program_line_num.size(); i++)

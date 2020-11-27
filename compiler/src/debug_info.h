@@ -2,6 +2,7 @@
 #define DEBUG_INFO_H 
 
 #include "file_location.h"
+#include "block_alloc.h"
 
 struct DebugVar
 {
@@ -25,6 +26,8 @@ struct DebugInfo
 
     int n_filenames;
     FilenameMapping* filename_mapping;
+
+    BlockAlloc symbol_names_alloc;
 };
 
 #endif /* DEBUG_INFO_H */

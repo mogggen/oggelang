@@ -128,9 +128,17 @@ void VSplit::mouse_enter(Point mouse_pos)
     {
         int diff = mouse_pos.x - this->split_width;
         if(this->absolut)
+        {
             this->split_width += diff;
+            if(this->split_width > this->width)
+                this->split_width = this->width;
+        }
         else
+        {
             this->percent_width += (float)diff/(float)this->width;
+            if(this->percent_width > 1.0f)
+                this->percent_width = 1.0f;
+        }
     }
     else
     {
@@ -144,18 +152,18 @@ void VSplit::draw(Window* window, Area* area)
 {
     if(!this->absolut)
     {
-        this->split_width = area->width*this->percent_width;
-        this->width = window->width;
+        this->split_width = area->x + area->width*this->percent_width;
+        this->width = area->width;
     }
 
     Area aleft = *area;
-    aleft.width = this->split_width - aleft.x;
+    aleft.width = this->split_width - area->x;
     left->draw(window, &aleft);
     
     Area aright = *area;
     aright.x = this->split_width;
+    aright.width = area->width - this->split_width + area->x;
     right->draw(window, &aright);
 
     draw_line(window, COLOR_LIGHT, Point{this->split_width, area->y}, Point{this->split_width, area->y+area->height});
 }
-    

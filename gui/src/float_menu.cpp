@@ -37,11 +37,11 @@ void draw_float_menu(Window* window)
     else
         float_menu.area.y = float_menu.area.y;
 
-    draw_rect_fill(window, COLOR_DARK, Point{float_menu.area.x+float_menu.area.width, float_menu.area.y+float_menu.area.height}, Point{float_menu.area.x, float_menu.area.y});
+    draw_rect_fill(window, COLOR_DARK, float_menu.area);
 
     draw_buttons(&float_menu.buttons, window, Point{float_menu.area.x, float_menu.area.y});
     
-    draw_rect(window, COLOR_LIGHT, Point{float_menu.area.x+float_menu.area.width, float_menu.area.y+float_menu.area.height}, Point{float_menu.area.x, float_menu.area.y});
+    draw_rect(window, COLOR_LIGHT, float_menu.area);
 }
 
 void float_menu_mouse_enter(Point mouse_pos)

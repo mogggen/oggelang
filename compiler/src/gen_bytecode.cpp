@@ -8,6 +8,7 @@ struct Variable
 {
     int addr;
     const char* name;
+    FileLocation loc;
 };
 
 struct GeneratorCtx
@@ -37,7 +38,7 @@ int get_variable(std::unordered_map<unsigned long, Variable>& var_table, const c
 
 bool add_variable(std::unordered_map<unsigned long, Variable>& var_table, const char* name, int addr, FileLocation loc)
 {
-    auto res = var_table.insert({hash_djb2(name), Variable{addr, name}});
+    auto res = var_table.insert({hash_djb2(name), Variable{addr, name, loc}});
     if(!res.second)
     {
         report_error("Variable already declared.", loc);
@@ -361,10 +362,13 @@ CompiledObj gen_bytecode(AstStatement* root)
     gc.program_data.push_back((int)OpCode::END);
     gc.program_line_num.push_back(gc.program_line_num.back()); // linenumber for END
 
-    std::vector<const char*> var_names(gc.n_variables);
+    std::vector<VarNameLoc> var_names(gc.n_variables);
 
     for(auto var : gc.var_table)
-        var_names[var.second.addr] = var.second.name;
+    {
+        var_names[var.second.addr].name = var.second.name;
+        var_names[var.second.addr].loc = var.second.loc;
+    }
 
 
     return CompiledObj{
