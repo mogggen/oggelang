@@ -72,4 +72,45 @@ bool get_open_file_path(Window* window, char* file_path_buf, int buf_size)
     return true;
 }
 
+#elif __unix__
+
+#include <stdio.h>
+#include <sys/stat.h>
+
+const char* get_filename_form_path(const char* file_path)
+{
+    const char* last_slash = file_path;
+
+    while(*file_path != '\0')
+    {
+        if(*file_path == '/')
+            last_slash = file_path;
+        file_path++;
+    }
+    return last_slash+1;
+}
+
+long long get_last_modified_time(const char* filename)
+{
+    struct stat result;
+    if(stat(filename, &result) == 0)
+        return result.st_mtime;
+    else
+        return 0;
+}
+
+bool get_open_file_path(Window* window, char* file_path_buf, int buf_size)
+{
+    FILE* f = popen("zenity --file-selection", "r");
+    fgets(file_path_buf, buf_size, f);
+    fclose(f);
+
+    // remove '\n' at end of filepath
+    char* c = file_path_buf;
+    while(*c != '\0' && *c != '\n') c++;
+    *c = '\0';
+
+    return true;
+}
+
 #endif

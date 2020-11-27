@@ -1,5 +1,9 @@
 #include "buffer.h"
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <errno.h>
 #include "util.h"
 #include "file_util.h"
 
@@ -8,17 +12,18 @@ void load_file(Buffer* buffer, const char* filepath)
     if(buffer->buffer != nullptr)
         free(buffer->buffer);
 
-    FILE* file;
-    auto error_no = fopen_s(&file, filepath, "r");
-    if(error_no != 0)
+    FILE* file = fopen(filepath, "r");
+    if(file == nullptr)
     {
-        printf("Failed to open file %s\n", filepath);
+        printf("Failed to open file |%s|\n", filepath);
         char error_str[] = "Failed to open file";
         auto len = strlen(error_str);
         buffer->buffer = (char*)malloc(len+1);
         memcpy(buffer->buffer, error_str, len+1);
         buffer->buffer[len] = '\0';
         buffer->buffer_size = (long)len;
+        buffer->lines.push_back(buffer->buffer);
+        printf("%s", strerror(errno));
         return;
     }
 

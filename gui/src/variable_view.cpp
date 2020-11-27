@@ -1,5 +1,6 @@
 #include "variable_view.h"
 
+#include <stdio.h>
 #include "font.h"
 #include "file_util.h"
 

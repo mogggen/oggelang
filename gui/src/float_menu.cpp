@@ -1,5 +1,7 @@
 #include "float_menu.h"
 
+#include <stdio.h>
+
 const int FLOAT_MENU_PADDING = 3;
 
 struct FloatMenu
@@ -20,9 +22,9 @@ static bool float_menu_open = false;
 void button_callback(void* owner, void* data)
 {
     FloatMenu* menu = (FloatMenu*)owner;
-    printf("Picked: %s\n", menu->options[(int)data]);
+    printf("Picked: %s\n", menu->options[(long)data]);
     float_menu_open = false;
-    menu->callback((int)data);
+    menu->callback((long)data);
 }
 
 void draw_float_menu(Window* window)

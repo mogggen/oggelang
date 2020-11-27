@@ -13,6 +13,12 @@
 #include "error.h"
 #include "util.h"
 
+#ifdef WIN32
+#define DIR_SYMBOL '\\'
+#elif __unix__
+#define DIR_SYMBOL '/'
+#endif
+
 int find_last_char(const char* str, char c)
 {
     int last_pos = -1;
@@ -39,7 +45,7 @@ int compile_program(ByteCode* out_code, const char* filename, bool print_ast, De
     char filepath_buffer[2048]; // buffer for directory and filename
 
     // find directory
-    int last_slash = find_last_char(filename, '\\');
+    int last_slash = find_last_char(filename, DIR_SYMBOL);
     int directory_size;
     if(last_slash < 0)
     {

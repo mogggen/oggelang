@@ -1,5 +1,7 @@
 #include "bytecode_view.h"
 
+#include <stdio.h>
+
 const int LINE_NUM_PADDING = 3;
 
 void ByteCodeView::mouse_scroll_update(int scroll, Point mouse_pos)

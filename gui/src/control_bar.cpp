@@ -1,5 +1,6 @@
 #include "control_bar.h"
 
+#include <stdio.h>
 #include "gui_main.h"
     
 void ControlBar::mouse_left_click(Point mouse_pos)

@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include <vector>
+#include <string.h>
 #include "SDL.h"
 #include "stb_image.h"
 #include "block_alloc.h"
