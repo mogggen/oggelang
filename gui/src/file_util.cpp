@@ -1,5 +1,15 @@
 #include "file_util.h"
 
+void convert_to_unix_file_path(char* path)
+{
+    while(*path != '\0')
+    {
+        if(*path == '\\')
+            *path = '/';
+        path++;
+    }
+}
+
 #ifdef WIN32
 
 #include <windows.h>
@@ -16,7 +26,7 @@ const char* get_filename_form_path(const char* file_path)
 
     while(*file_path != '\0')
     {
-        if(*file_path == '\\')
+        if(*file_path == '/')
             last_slash = file_path;
         file_path++;
     }

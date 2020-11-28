@@ -14,8 +14,8 @@
 #include "util.h"
 
 #ifdef WIN32
-#define DIR_SYMBOL '\\'
-#elif __unix__
+#define DIR_SYMBOL '/'
+#else
 #define DIR_SYMBOL '/'
 #endif
 
@@ -59,6 +59,7 @@ int compile_program(ByteCode* out_code, const char* filename, bool print_ast, De
         compile_queue.push(filename+directory_size); // push only filename and not entire path
     }
 
+    printf("%c %d\n", DIR_SYMBOL, directory_size);
 
     while(compile_queue.size() > 0)
     {

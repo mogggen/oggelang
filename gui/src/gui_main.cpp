@@ -260,6 +260,8 @@ void open_file()
     if(!get_open_file_path(&gui.window, filepath, 1024))
         return;
 
+    convert_to_unix_file_path(filepath);
+
     // check if file is already in a buffer
     unsigned long filepath_hash = hash_djb2(filepath);
     int i = 0;

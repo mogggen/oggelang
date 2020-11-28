@@ -5,6 +5,7 @@
 #include "compiler.h"
 #include "interpreter.h"
 #include "gui_main.h"
+#include "file_util.h"
 
 struct CliParameters
 {
@@ -43,21 +44,12 @@ CliParameters parse_cliargs(int argc, char** argv)
     return parameters;
 }
 
-void convert_to_unix_file_path(char* path)
-{
-    while(*path != '\0')
-    {
-        if(*path == '\\')
-            *path = '/';
-        path++;
-    }
-}
 
 int main(int argc, char** argv)
 {
     CliParameters parameters = parse_cliargs(argc, argv);
-    //parameters.print_ast = true;
-    //parameters.print_opcodes = true;
+    parameters.print_ast = true;
+    parameters.print_opcodes = true;
     //parameters.run_program = false;
     parameters.gui = true;
 
