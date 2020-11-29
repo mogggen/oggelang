@@ -4,38 +4,20 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "stack.h"
+
 void report_runtime_errro(const char* msg, int pc)
 {
     printf("RUNTIME ERROR: %s at %d\n", msg, pc);
 }
 
-struct Stack
-{
-    int sp;
-    int* stack;
-};
-
-inline void push(Stack& stack, int value)
-{
-    stack.stack[++stack.sp] = value;
-}
-inline int peek(Stack& stack)
-{
-    return stack.stack[stack.sp];
-}
-inline int pop(Stack& stack)
-{
-    return stack.stack[stack.sp--];
-}
-
-#define AT(addr) (addr >= code.size) ? heap[addr-code.size] : mem[addr]
+#define AT(addr) (addr >= code_size) ? heap[addr-code_size] : mem[addr]
 
 #define SET(addr, value)\
-    if(addr >= code.size)\
-        heap[addr-code.size] = value;\
+    if(addr >= code_size)\
+        heap[addr-code_size] = value;\
     else\
         mem[addr] = value;\
-
 
 void run(ByteCode code)
 {
@@ -45,8 +27,7 @@ void run(ByteCode code)
     std::vector<int> heap;
 
     Stack stack;
-    stack.sp = -1;
-    stack.stack = (int*)malloc(sizeof(int)*1024);
+    create_stack(&stack, 1024);
 
     while(pc < code.code_size)
     {
@@ -201,4 +182,3 @@ void run(ByteCode code)
         }
     }
 }
-

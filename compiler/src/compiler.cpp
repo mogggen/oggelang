@@ -35,6 +35,8 @@ int find_last_char(const char* str, char c)
 
 int compile_program(ByteCode* out_code, const char* filename, bool print_ast, DebugInfo* out_dbginfo)
 {
+    reset_num_error();
+
     std::vector<CompiledObj> compiled_objects;
 
     BlockAlloc symbol_names_alloc = create_block_alloc(1024);

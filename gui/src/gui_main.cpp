@@ -15,6 +15,7 @@
 #include "buffer_view.h"
 #include "bytecode_view.h"
 #include "variable_view.h"
+#include "error_view.h"
 #include "buffer.h"
 #include "float_menu.h"
 
@@ -32,6 +33,7 @@ struct Gui
     ControlBar control_bar;
     ByteCodeView bytecode_view;
     VariableView variable_view;
+    ErrorView error_view;
     View* selectable_views[N_SELECTABLE_VIEWS];
     View* views;
 
@@ -81,9 +83,11 @@ int init_gui(Gui* gui)
     create_control_bar(&gui->window, &gui->control_bar);
     create_bytecode_view(&gui->bytecode_view);
     create_variable_view(&gui->variable_view, &gui->byte_code, &gui->dbginfo);
+    create_error_view(&gui->error_view);
 
     gui->selectable_views[0] = &gui->bytecode_view;
     gui->selectable_views[1] = &gui->variable_view;
+    gui->selectable_views[2] = &gui->error_view;
 
 
     ViewSelect* select_right = allocate_assign(gui->alloc, ViewSelect());
@@ -104,6 +108,7 @@ int init_gui(Gui* gui)
 
 void compile(int main_buffer_idx)
 {
+    clear_errors(&gui.error_view);
     compile_program(&gui.byte_code, gui.buffers[main_buffer_idx].filepath, true, &gui.dbginfo);
     show_bytecode(&gui.bytecode_view, &gui.byte_code);
     print_opcodes(gui.byte_code, &gui.dbginfo);
@@ -231,7 +236,7 @@ int gui_main()
     SDL_DestroyWindow(gui.window.window);
     SDL_Quit();
 
-
+    close(&gui.error_view);
     dealloc(gui.dbginfo.symbol_names_alloc);
     dealloc(gui.alloc);
     return 0;

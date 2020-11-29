@@ -6,7 +6,7 @@
 
 int gui_main();
 
-const int N_SELECTABLE_VIEWS = 2;
+const int N_SELECTABLE_VIEWS = 3;
 
 Buffer& get_buffer(int buffer_idx);
 std::vector<Buffer>& get_buffers();

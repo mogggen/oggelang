@@ -25,3 +25,8 @@ int get_num_error()
 {
     return num_error;
 }
+
+void reset_num_error()
+{
+    num_error = 0;
+}

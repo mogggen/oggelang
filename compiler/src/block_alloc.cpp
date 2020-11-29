@@ -49,4 +49,5 @@ void dealloc(BlockAlloc& alloc)
         next = next->next;
         free(t);
     }
+    alloc.first = nullptr;
 }
