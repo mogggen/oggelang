@@ -11,11 +11,11 @@ void report_runtime_errro(const char* msg, int pc)
     printf("RUNTIME ERROR: %s at %d\n", msg, pc);
 }
 
-#define AT(addr) (addr >= code_size) ? heap[addr-code_size] : mem[addr]
+#define AT(addr) (addr >= code.code_size) ? heap[addr-code.code_size] : mem[addr]
 
 #define SET(addr, value)\
-    if(addr >= code_size)\
-        heap[addr-code_size] = value;\
+    if(addr >= code.code_size)\
+        heap[addr-code.code_size] = value;\
     else\
         mem[addr] = value;\
 

@@ -12,6 +12,11 @@ struct DebugState
     std::vector<int> heap;
     ByteCode* code;
     DebugInfo* dbginfo;
+
+    void(*report_error_func)( const char* err_str, int addr);
+    void(*print_char_func)(int);
+    void(*print_int_func)(int);
+    int (*input_int_func)();
 };
 
 void start_debug(DebugState* dbgstate, ByteCode* code, DebugInfo* dbginfo);

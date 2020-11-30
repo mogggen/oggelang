@@ -1,9 +1,36 @@
 #include "debugger.h"
 
+void default_report_error(const char* err_str, int addr)
+{
+    printf("RUNTIME ERROR: %s at %d\n", err_str, addr);
+}
+
+void default_print_char(int c)
+{
+    printf("%c", (char)c);
+}
+
+void default_print_int(int i)
+{
+    printf("%d", i);
+}
+
+int default_input_int()
+{
+    int i;
+    scanf("%d", &i);
+    return i;
+}
+
 void start_debug(DebugState* dbgstate, ByteCode* code, DebugInfo* dbginfo)
 {
     dbgstate->code = code;
     dbgstate->dbginfo = dbginfo;
+
+    dbgstate->report_error_func = default_report_error;
+    dbgstate->print_char_func   = default_print_char;
+    dbgstate->print_int_func    = default_print_int;
+    dbgstate->input_int_func    = default_input_int;
 }
 
 #define AT(addr) (addr >= code_size) ? heap[addr-code_size] : mem[addr]
@@ -103,7 +130,7 @@ void step_instruction(DebugState* dbgstate)
                 case CmpTypes::GREATER_EQUAL: push(stack, a >= b ? 1 : 0 ); break;
                 case CmpTypes::LESS:          push(stack, a <  b ? 1 : 0 ); break;
                 case CmpTypes::GREATER:       push(stack, a >  b ? 1 : 0 ); break;
-                default: report_runtime_errro("Compare error.", pc-2); return;
+                default: dbgstate->report_error_func("Compare error.", pc-2); return;
             }
         } break;
 
@@ -152,27 +179,36 @@ void step_instruction(DebugState* dbgstate)
         } break;
     case OpCode::PRINT:
         {
-            printf("%d", pop(stack));
+            dbgstate->print_int_func(pop(stack));
         } break;
     case OpCode::PRINTC:
         {
-            printf("%c", (char)pop(stack));
+            dbgstate->print_char_func(pop(stack));
         } break;
     case OpCode::SCAN:
         {
-            int v;
             int a = pop(stack);
-            scanf("%d", &v);
+            int v = dbgstate->input_int_func();
             SET(a, v);
         } break;
 
     case OpCode::END:
         {
-            pc = code.code_size; // jump to end
+            pc = code_size; // jump to end
         } break;
     }
 }
 
-void step_line(DebugState* dbgstate);
+void step_line(DebugState* dbgstate)
+{
 
-void run(DebugState* dbgstate);
+}
+
+void run(DebugState* dbgstate)
+{
+    while( dbgstate->pc < dbgstate->code->code_size )
+    {
+        step_instruction(dbgstate);
+        dbgstate->pc++;
+    }
+}
