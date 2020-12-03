@@ -114,22 +114,23 @@ bool create_font(Font* font, Window* window, const char* filename, int size)
     return true;
 }
 
-void draw_text(Window* window, const Font* font, const char* text, Point pos)
+int draw_text(Window* window, const Font* font, const char* text, Point pos)
 {
-    draw_text(window, font, text, pos, '\0', COLOR_LIGHT);
+    return draw_text(window, font, text, pos, '\0', COLOR_LIGHT);
 }
 
-void draw_text(Window* window, const Font* font, const char* text, Point pos, char end_char, Color color)
+int draw_text(Window* window, const Font* font, const char* text, Point pos, char end_char, Color color)
 {
     int x_pos = pos.x;
     int y_pos = pos.y;
 
-    while(*text != '\0' && *text != end_char)
+    int i = 0;
+    while(text[i] != '\0' && text[i] != end_char)
     {
-        const Character* character = font->characters+*text;
+        const Character* character = font->characters+*(text + i);
         if(!character->is_valid)
         {
-            text++;
+            i++;
             continue;
         }
 
@@ -146,8 +147,10 @@ void draw_text(Window* window, const Font* font, const char* text, Point pos, ch
         }
 
         x_pos += character->advance;
-        text++;
+        i++;
     }
+
+    return i;
 }
 
 void get_text_size(const Font* font, const char* text, int* out_width, int* out_height)

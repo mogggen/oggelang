@@ -23,8 +23,8 @@ struct Font
 };
 
 bool init_fonts(Window* window);
-void draw_text(Window* window, const Font* font, const char* text, Point pos);
-void draw_text(Window* window, const Font* font, const char* text, Point pos, char end_char, Color color);
+int draw_text(Window* window, const Font* font, const char* text, Point pos);
+int draw_text(Window* window, const Font* font, const char* text, Point pos, char end_char, Color color);
 void get_text_size(const Font* font, const char* text, int* out_width, int* out_height);
 
 const Font* get_regular_font();
