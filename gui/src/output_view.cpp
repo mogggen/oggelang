@@ -6,7 +6,16 @@ void OutputView::draw(Window* window, Area* area)
 
 void create_output_view(OutputView* view)
 {
-    view->buffer_alloc = create_block_alloc(1024);
+    view->current = &view->first; 
+}
+
+char* add_text(OutputView* view, int size)
+{
+    if(view->current->size + size >= TEXT_BLOCK_SIZE)
+    {
+        // create new text block
+    }
+
 }
 
 void print_char(OutputView* view, char c)

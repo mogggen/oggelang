@@ -6,16 +6,20 @@
 #include "block_alloc.h"
 
 
+const int TEXT_BLOCK_SIZE = 1024;
+
 struct _TextBlock
 {
-    _TextBlock* next;
-    int size;
-    char data[1];
+    _TextBlock* next = nullptr;
+    int size = 1; // first is 
+    char data[TEXT_BLOCK_SIZE];
 };
 
 class OutputView : public View
 {
 public:
+    _TextBlock first;
+    _TextBlock* current;
 
     void draw(Window* window, Area* area);
 
