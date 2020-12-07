@@ -16,6 +16,7 @@
 #include "bytecode_view.h"
 #include "variable_view.h"
 #include "error_view.h"
+#include "output_view.h"
 #include "buffer.h"
 #include "float_menu.h"
 
@@ -24,6 +25,8 @@
 #include "debug_info.h"
 #include "opcodes.h"
 #include "compiler.h"
+
+#include "debugger.h"
 
 struct Gui
 {
@@ -34,6 +37,7 @@ struct Gui
     ByteCodeView bytecode_view;
     VariableView variable_view;
     ErrorView error_view;
+    OutputView output_view;
     View* selectable_views[N_SELECTABLE_VIEWS];
     View* views;
 
@@ -42,10 +46,22 @@ struct Gui
     ByteCode byte_code;
     DebugInfo dbginfo;
 
+    DebugState dbgstate;
+
     std::vector<Buffer> buffers;
 };
 
 Gui gui;
+
+void output_view_print_char(int c)
+{
+    print_char(&gui.output_view, (char)c);
+}
+
+void output_view_print_int(int i)
+{
+    print_int(&gui.output_view, i);
+}
 
 int init_gui(Gui* gui)
 {
@@ -84,10 +100,12 @@ int init_gui(Gui* gui)
     create_bytecode_view(&gui->bytecode_view);
     create_variable_view(&gui->variable_view, &gui->byte_code, &gui->dbginfo);
     create_error_view(&gui->error_view);
+    create_output_view(&gui->output_view);
 
     gui->selectable_views[0] = &gui->bytecode_view;
     gui->selectable_views[1] = &gui->variable_view;
     gui->selectable_views[2] = &gui->error_view;
+    gui->selectable_views[3] = &gui->output_view;
 
 
     ViewSelect* select_right = allocate_assign(gui->alloc, ViewSelect());
@@ -103,12 +121,22 @@ int init_gui(Gui* gui)
 
     gui->views = (View*)split1;
 
+
+    gui->dbgstate.print_char_func = output_view_print_char;
+    gui->dbgstate.print_int_func = output_view_print_int;
+
+
+    print_int(&gui->output_view, -1000);
+
+
     return 1;
 }
 
 void compile(int main_buffer_idx)
 {
     clear_errors(&gui.error_view);
+    clear(&gui.output_view);
+
     compile_program(&gui.byte_code, gui.buffers[main_buffer_idx].filepath, true, &gui.dbginfo);
     show_bytecode(&gui.bytecode_view, &gui.byte_code);
     print_opcodes(gui.byte_code, &gui.dbginfo);
@@ -237,6 +265,7 @@ int gui_main()
     SDL_Quit();
 
     close(&gui.error_view);
+    close(&gui.output_view);
     dealloc(gui.dbginfo.symbol_names_alloc);
     dealloc(gui.alloc);
     return 0;

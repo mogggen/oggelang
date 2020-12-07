@@ -5,6 +5,11 @@
 #include "opcodes.h"
 #include "stack.h"
 
+void default_report_error(const char* err_str, int addr);
+void default_print_char(int c);
+void default_print_int(int i);
+int default_input_int();
+
 struct DebugState
 {
     int pc;
@@ -13,10 +18,10 @@ struct DebugState
     ByteCode* code;
     DebugInfo* dbginfo;
 
-    void(*report_error_func)( const char* err_str, int addr);
-    void(*print_char_func)(int);
-    void(*print_int_func)(int);
-    int (*input_int_func)();
+    void(*report_error_func)( const char* err_str, int addr) = default_report_error;
+    void(*print_char_func)(int) = default_print_char;
+    void(*print_int_func)(int) = default_print_int;
+    int (*input_int_func)() = default_input_int;
 };
 
 void start_debug(DebugState* dbgstate, ByteCode* code, DebugInfo* dbginfo);

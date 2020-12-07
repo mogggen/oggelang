@@ -6,4 +6,5 @@ include_directories( ${include_dirs} )
 
 add_library( interpreter 
     ${src_dir}/interpreter.cpp
+    ${src_dir}/debugger.cpp
 )

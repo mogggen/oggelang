@@ -26,11 +26,6 @@ void start_debug(DebugState* dbgstate, ByteCode* code, DebugInfo* dbginfo)
 {
     dbgstate->code = code;
     dbgstate->dbginfo = dbginfo;
-
-    dbgstate->report_error_func = default_report_error;
-    dbgstate->print_char_func   = default_print_char;
-    dbgstate->print_int_func    = default_print_int;
-    dbgstate->input_int_func    = default_input_int;
 }
 
 #define AT(addr) (addr >= code_size) ? heap[addr-code_size] : mem[addr]

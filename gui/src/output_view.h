@@ -11,7 +11,7 @@ const int TEXT_BLOCK_SIZE = 1024;
 struct _TextBlock
 {
     _TextBlock* next = nullptr;
-    int size = 1; // first is 
+    int size = 0;
     char data[TEXT_BLOCK_SIZE];
 };
 

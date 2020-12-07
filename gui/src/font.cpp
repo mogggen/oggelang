@@ -153,6 +153,27 @@ int draw_text(Window* window, const Font* font, const char* text, Point pos, cha
     return i;
 }
 
+void draw_char(Window* window, DrawTextCursor* cursor, char c, Color color)
+{
+    const Character* character = &cursor->font->characters[(int)c];
+    if(!character->is_valid)
+        return;
+
+    if(character->texture != nullptr)
+    {
+        SDL_Rect texture_rect;
+        texture_rect.x = cursor->pos.x + character->left;
+        texture_rect.y = cursor->pos.y - character->top;
+        texture_rect.w = character->width;
+        texture_rect.h = character->height;
+
+        SDL_SetTextureColorMod(character->texture, color.r, color.g, color.b);
+        SDL_RenderCopy(window->renderer, character->texture, nullptr, &texture_rect);
+    }
+
+    cursor->pos.x += character->advance;
+}
+
 void get_text_size(const Font* font, const char* text, int* out_width, int* out_height)
 {
     int widht = 0;
@@ -181,6 +202,23 @@ void get_text_size(const Font* font, const char* text, int* out_width, int* out_
 
     *out_width = widht;
     *out_height = top - bottom;
+}
+
+DrawTextCursor create_cursor(const Font* font, Point pos)
+{
+    return DrawTextCursor
+    {
+        font,
+        pos.x,
+        font->size,
+        Point{pos.x, pos.y + font->size}
+    };
+}
+
+void next_line(DrawTextCursor* cursor)
+{
+    cursor->pos.x = cursor->start_xpos;
+    cursor->pos.y += cursor->line_spacing;
 }
 
 const Font* get_regular_font()  {return &regular;}
