@@ -69,7 +69,7 @@ void BufferView::draw(Window* window, Area* area)
     this->pos = {area->x, area->y};
     int text_xpos = this->line_num_width + 2*LINE_NUM_PADDING;
     int line_num_xpos = LINE_NUM_PADDING;
-    int y_pos = font->size*2;
+    int y_pos = font->size;
 
     // fill background
     draw_rect_fill(window, COLOR_DARK, *area);
@@ -83,13 +83,13 @@ void BufferView::draw(Window* window, Area* area)
     if(this->buffer_idx < 0)
     {
         draw_text(window, font, "Open a file (Ctrl-O) or", this->pos+Point{text_xpos, y_pos}, '\0', COLOR_LIGHT);
-        draw_text(window, font, "select an open file (Right Click)", this->pos+Point{text_xpos, y_pos + font->size}, '\0', COLOR_LIGHT);
+        draw_text(window, font, "select an open file (Right Click)", this->pos+Point{text_xpos, y_pos+font->size}, '\0', COLOR_LIGHT);
     }
     else
     {
         Buffer& buffer = get_buffer(this->buffer_idx);
         // draw filename
-        draw_text(window, font, buffer.filename, this->pos + Point{0, font->size - 3});
+        draw_text(window, font, buffer.filename, this->pos + Point{0, -3});
 
         // draw content
         char num_string[16];

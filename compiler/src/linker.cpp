@@ -94,6 +94,7 @@ int link_debug(std::vector<CompiledObj>& compiled_objects, ByteCode* code, Debug
         co_index++;
     }
 
+    // set all variables to 0
     for(int i=total_code_size; i<total_size; i++)
         data[i] = 0;
 

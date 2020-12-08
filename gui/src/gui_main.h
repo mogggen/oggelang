@@ -13,5 +13,6 @@ std::vector<Buffer>& get_buffers();
 Buffer* get_main_buffer();
 View** get_selectable_views();
 void open_file();
+void run_program();
 
 #endif

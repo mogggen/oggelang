@@ -33,7 +33,7 @@ Button* new_button(ButtonGroup* group, const char* text, Point pos, int width, i
     b.text_offset = 
     {
         ((b.right - b.left) - text_width )/2,
-        ((b.bottom - b.top) + text_height)/2
+        ((b.bottom - b.top) + text_height)/2 - group->font->size
     };
 
     group->buttons.push_back(b);

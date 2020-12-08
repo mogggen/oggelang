@@ -6,12 +6,15 @@
 struct Stack
 {
     int sp;
-    int* stack;
+    int* stack = nullptr; 
 };
 
 inline void create_stack(Stack* stack, int size)
 {
     stack->sp = -1;
+    if(stack->stack != nullptr)
+        free(stack->stack);
+
     stack->stack = (int*)malloc(sizeof(int)*size);
 }
 

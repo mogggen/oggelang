@@ -49,16 +49,21 @@ int compile_program(ByteCode* out_code, const char* filename, bool print_ast, De
     // find directory
     int last_slash = find_last_char(filename, DIR_SYMBOL);
     int directory_size;
+    unsigned long directory_hash;
     if(last_slash < 0)
     {
         directory_size = 0;
         compile_queue.push(filename);
+        directory_hash = hash_djb2("");
     }
     else
     {
         directory_size = last_slash+1;
         strncpy(filepath_buffer, filename, directory_size); // copy directory to filepath_buffer
         compile_queue.push(filename+directory_size); // push only filename and not entire path
+
+        filepath_buffer[directory_size] = '\0';
+        directory_hash = hash_djb2(filepath_buffer);
     }
 
     printf("%c %d\n", DIR_SYMBOL, directory_size);
@@ -92,7 +97,7 @@ int compile_program(ByteCode* out_code, const char* filename, bool print_ast, De
             print_statement(root);
 
         // generate byte code
-        compiled_objects.push_back(gen_bytecode(root));
+        compiled_objects.push_back(gen_bytecode(root, directory_hash));
         CompiledObj& obj = compiled_objects.back();
 
         dealloc(alloc);

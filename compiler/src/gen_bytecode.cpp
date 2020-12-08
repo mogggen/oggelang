@@ -20,6 +20,7 @@ struct GeneratorCtx
     std::vector<int> var_addr;
     std::vector<AddrLinenum> goto_addr;
     unsigned long filename_hash;
+    unsigned long file_directory_hash;
     std::vector<const char*> dependent_files;
 };
 
@@ -261,7 +262,7 @@ int gen_bytecode_statement(GeneratorCtx& gc, AstStatement* stmt)
                 }
                 else
                 {
-                    gc.goto_addr.push_back({gc.program_data.size(), hash_djb2(stmt->goto_filename), stmt->goto_line_number});
+                    gc.goto_addr.push_back({gc.program_data.size(), hash_djb2(gc.file_directory_hash, stmt->goto_filename), stmt->goto_line_number});
                     gc.dependent_files.push_back(stmt->goto_filename);
                 }
                 //gc.program_line_num.push_back({beginning_addr, gc.filename_hash, stmt->loc.line});
@@ -345,10 +346,11 @@ int gen_bytecode_statement(GeneratorCtx& gc, AstStatement* stmt)
     return gc.program_data.size() - prev_size;
 }
 
-CompiledObj gen_bytecode(AstStatement* root)
+CompiledObj gen_bytecode(AstStatement* root, unsigned long file_directory_hash)
 {
     GeneratorCtx gc; 
     gc.filename_hash = hash_djb2(root->loc.filename);
+    gc.file_directory_hash = file_directory_hash;
 
     AstStatement* statement = root;
     while(statement != nullptr)

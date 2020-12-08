@@ -23,7 +23,7 @@ void ByteCodeView::draw(Window* window, Area* area)
     this->pos = {area->x, area->y};
     int text_xpos = this->line_num_width + 2*LINE_NUM_PADDING;
     int line_num_xpos = LINE_NUM_PADDING;
-    int y_pos = font->size*1;
+    int y_pos = 0;
 
     // fill background
     draw_rect_fill(window, COLOR_DARK, *area);

@@ -15,14 +15,14 @@ void ControlBar::draw(Window* window, Area* area)
 {
     draw_buttons(&this->buttons, window, Point{area->x, area->y});
 
-    draw_text(window, buttons.font, "Main file:", Point{120,  buttons.font->size+5});
+    draw_text(window, buttons.font, "Main file:", Point{120, 5});
     if(get_main_buffer() != nullptr)
     {
-        draw_text(window, buttons.font, get_main_buffer()->filename, Point{175, buttons.font->size+5});
+        draw_text(window, buttons.font, get_main_buffer()->filename, Point{175, 5});
     }
     else
     {
-        draw_text(window, buttons.font, "No file selected", Point{175, buttons.font->size+5});
+        draw_text(window, buttons.font, "No file selected", Point{175, 5});
     }
 
     //draw_line(window, COLOR_GRAY, Point{0,CONTROL_BAR_HEIGHT}, Point{window->width,CONTROL_BAR_HEIGHT});
@@ -37,6 +37,7 @@ void open_file_button_callback(void* owner, void* data)
 void run_button_callback(void* owner, void*)
 {
     printf("Run button\n");
+    run_program();
 }
 
 void stop_button_callback(void* owner, void*)

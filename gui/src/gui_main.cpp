@@ -331,6 +331,12 @@ void open_file()
     set_buffer(get_selected_buffer_view(), new_buffer_idx); 
 }
 
+void run_program()
+{
+    start_debug(&gui.dbgstate, &gui.byte_code, &gui.dbginfo);
+    run(&gui.dbgstate);    
+}
+
 View** get_selectable_views()
 {
     return (View**)gui.selectable_views;

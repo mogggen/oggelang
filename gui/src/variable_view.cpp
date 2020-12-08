@@ -11,7 +11,7 @@ void VariableView::draw(Window* window, Area* area)
     auto font = get_regular_font();
     Point pos = Point{area->x, area->y};
     
-    int y_pos = font->size;
+    int y_pos = 0;
 
     // fill background
     draw_rect_fill(window, COLOR_DARK, *area);

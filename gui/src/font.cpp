@@ -122,7 +122,7 @@ int draw_text(Window* window, const Font* font, const char* text, Point pos)
 int draw_text(Window* window, const Font* font, const char* text, Point pos, char end_char, Color color)
 {
     int x_pos = pos.x;
-    int y_pos = pos.y;
+    int y_pos = pos.y + font->size;
 
     int i = 0;
     while(text[i] != '\0' && text[i] != end_char)
@@ -163,7 +163,7 @@ void draw_char(Window* window, DrawTextCursor* cursor, char c, Color color)
     {
         SDL_Rect texture_rect;
         texture_rect.x = cursor->pos.x + character->left;
-        texture_rect.y = cursor->pos.y - character->top;
+        texture_rect.y = cursor->pos.y - character->top + cursor->font->size;
         texture_rect.w = character->width;
         texture_rect.h = character->height;
 

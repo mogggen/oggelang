@@ -6,6 +6,7 @@
 #include "interpreter.h"
 #include "gui_main.h"
 #include "file_util.h"
+#include "debugger.h"
 
 struct CliParameters
 {
@@ -50,8 +51,8 @@ int main(int argc, char** argv)
     CliParameters parameters = parse_cliargs(argc, argv);
     parameters.print_ast = true;
     parameters.print_opcodes = true;
-    //parameters.run_program = false;
-    parameters.gui = true;
+    parameters.run_program = false;
+    parameters.gui = false;
 
     if(parameters.gui)
     {
@@ -71,7 +72,8 @@ int main(int argc, char** argv)
 #endif
 
         ByteCode code;
-        if(!compile_program(&code, parameters.filename, parameters.print_ast, nullptr))
+        DebugInfo info;
+        if(!compile_program(&code, parameters.filename, parameters.print_ast, &info))
         {
             return 0;
         }
@@ -81,6 +83,10 @@ int main(int argc, char** argv)
             print_opcodes(code);
             printf("------------\n");
         }
+
+        DebugState state;
+        start_debug(&state, &code, &info);
+        run(&state);
 
         if(parameters.run_program)
             run(code);

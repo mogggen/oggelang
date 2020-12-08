@@ -22,7 +22,7 @@ static bool float_menu_open = false;
 void button_callback(void* owner, void* data)
 {
     FloatMenu* menu = (FloatMenu*)owner;
-    printf("Picked: %s\n", menu->options[(long)data]);
+    //printf("Picked: %s\n", menu->options[(long)data]);
     float_menu_open = false;
     menu->callback((long)data);
 }

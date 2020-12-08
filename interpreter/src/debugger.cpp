@@ -24,6 +24,10 @@ int default_input_int()
 
 void start_debug(DebugState* dbgstate, ByteCode* code, DebugInfo* dbginfo)
 {
+    dbgstate->pc = 0;
+    create_stack(&dbgstate->stack, 1024);
+    dbgstate->heap.clear();
+
     dbgstate->code = code;
     dbgstate->dbginfo = dbginfo;
 }
@@ -42,7 +46,7 @@ void step_instruction(DebugState* dbgstate)
     auto& heap = dbgstate->heap; 
     auto& stack = dbgstate->stack;
     int* mem = dbgstate->code->data;
-    int code_size = dbgstate->code->code_size;
+    int code_size = dbgstate->code->size;
 
     switch((OpCode)mem[pc++])
     {

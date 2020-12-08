@@ -3,13 +3,20 @@
 
 void OutputView::draw(Window* window, Area* area)
 {
+    const Font* font = get_regular_font();
+
     // fill background
     draw_rect_fill(window, COLOR_DARK, *area);
 
+    int title_bar_height = font->size + 3;
+    Area title_area = {area->x, area->y, area->width, title_bar_height};
+    draw_rect_fill(window, COLOR_DARK2, title_area);
+
+    draw_text(window, font, "Program output", Point{area->x +2, area->y});
+
     _TextBlock* curr = &this->first;
 
-    DrawTextCursor cursor = create_cursor(get_regular_font(), Point{area->x+2, area->y+2});
-
+    DrawTextCursor cursor = create_cursor(font, Point{area->x+2, area->y + title_bar_height+2});
     while(curr != nullptr)
     {
         for(int i=0; i<curr->size; i++)
@@ -82,6 +89,9 @@ void clear(OutputView* view)
         free(curr);
         curr = t;
     }
+
+    view->first.size = 0;
+    view->first.next = nullptr;
 }
 
 void close(OutputView* view)

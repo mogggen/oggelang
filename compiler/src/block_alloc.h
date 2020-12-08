@@ -9,10 +9,10 @@ struct _MemBlock
 
 struct BlockAlloc
 {
-    int block_size;
-    int size;
-    _MemBlock* first;
-    _MemBlock* current;
+    int block_size = 0;
+    int size = 0;
+    _MemBlock* first = nullptr;
+    _MemBlock* current = nullptr;
 };
 
 BlockAlloc create_block_alloc(int size);
