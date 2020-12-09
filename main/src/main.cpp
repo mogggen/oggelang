@@ -52,7 +52,7 @@ int main(int argc, char** argv)
     parameters.print_ast = true;
     parameters.print_opcodes = true;
     parameters.run_program = false;
-    parameters.gui = false;
+    parameters.gui = true;
 
     if(parameters.gui)
     {

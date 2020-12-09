@@ -8,7 +8,7 @@
 void default_report_error(const char* err_str, int addr);
 void default_print_char(int c);
 void default_print_int(int i);
-int default_input_int();
+int  default_input_int();
 
 struct DebugState
 {

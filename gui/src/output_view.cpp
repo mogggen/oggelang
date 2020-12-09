@@ -16,7 +16,7 @@ void OutputView::draw(Window* window, Area* area)
 
     _TextBlock* curr = &this->first;
 
-    DrawTextCursor cursor = create_cursor(font, Point{area->x+2, area->y + title_bar_height+2});
+    DrawTextCursor cursor = create_cursor(font, Point{area->x+2, area->y + 2});
     while(curr != nullptr)
     {
         for(int i=0; i<curr->size; i++)
@@ -75,7 +75,7 @@ void print_int(OutputView* view, int i)
         i /= 10;
     }
 
-    while(n_chars >= 0)
+    while(n_chars > 0)
         print_char(view, buf[--n_chars]);
 }
 

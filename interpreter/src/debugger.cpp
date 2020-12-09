@@ -208,6 +208,5 @@ void run(DebugState* dbgstate)
     while( dbgstate->pc < dbgstate->code->code_size )
     {
         step_instruction(dbgstate);
-        dbgstate->pc++;
     }
 }

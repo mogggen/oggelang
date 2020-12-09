@@ -31,6 +31,6 @@ struct CompiledObj
     std::vector<const char*> dependent_files;
 };
 
-CompiledObj gen_bytecode(AstStatement* root, unsigned long file_directory_hash)
+CompiledObj gen_bytecode(AstStatement* root, unsigned long file_directory_hash);
 
 #endif
