@@ -13,19 +13,21 @@ void ControlBar::mouse_enter(Point mouse_pos)
 }
 void ControlBar::draw(Window* window, Area* area)
 {
+    const int MAIN_FILE_TEST_X_POS = 215;
+    
     draw_buttons(&this->buttons, window, Point{area->x, area->y});
 
-    draw_text(window, buttons.font, "Main file:", Point{120, 5});
+    draw_text(window, buttons.font, "Main file:", Point{MAIN_FILE_TEST_X_POS-55, 5});
+
+
     if(get_main_buffer() != nullptr)
     {
-        draw_text(window, buttons.font, get_main_buffer()->filename, Point{175, 5});
+        draw_text(window, buttons.font, get_main_buffer()->filename, Point{MAIN_FILE_TEST_X_POS, 5});
     }
     else
     {
-        draw_text(window, buttons.font, "No file selected", Point{175, 5});
+        draw_text(window, buttons.font, "No file selected", Point{MAIN_FILE_TEST_X_POS, 5});
     }
-
-    //draw_line(window, COLOR_GRAY, Point{0,CONTROL_BAR_HEIGHT}, Point{window->width,CONTROL_BAR_HEIGHT});
 }
 
 void open_file_button_callback(void* owner, void* data)
@@ -43,6 +45,12 @@ void run_button_callback(void* owner, void*)
 void stop_button_callback(void* owner, void*)
 {
     printf("Stop button\n");
+}
+
+void step_button_callback(void* owner, void* data)
+{
+    step_program();
+    printf("Step button\n");
 }
 
 void create_control_bar(Window* window, ControlBar* bar)
@@ -77,6 +85,15 @@ void create_control_bar(Window* window, ControlBar* bar)
                 Point{x_pos,y_pos},
                 0,20, true,
                 stop_button_callback,
+                nullptr);
+        x_pos += b->right - b->left + 4;
+    }
+    {
+        Button* b = new_button(&bar->buttons,
+                "Step",
+                Point{x_pos,y_pos},
+                0,20, true,
+                step_button_callback,
                 nullptr);
         x_pos += b->right - b->left + 4;
     }

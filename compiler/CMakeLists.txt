@@ -12,5 +12,6 @@ add_library( compiler
     ${src_dir}/parser.cpp
     ${src_dir}/gen_bytecode.cpp
     ${src_dir}/linker.cpp
+    ${src_dir}/debug_info.cpp
 )
 

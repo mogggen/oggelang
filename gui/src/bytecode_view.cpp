@@ -2,6 +2,8 @@
 
 #include <stdio.h>
 
+#include "gui_main.h"
+
 const int LINE_NUM_PADDING = 3;
 
 void ByteCodeView::mouse_scroll_update(int scroll, Point mouse_pos)
@@ -31,16 +33,31 @@ void ByteCodeView::draw(Window* window, Area* area)
     // draw line number bar
     draw_rect_fill(window, COLOR_DARK2, Area{area->x, area->y, text_xpos, area->height});
 
+    int pc = get_pc();
+
     if(this->has_bytecode)
     {
         // draw content
         char num_string[16];
         for(int i=this->first_visible_line; i < this->lines.size(); i++)
         {
+            Color color;
+            if(this->addresses[i] == pc)
+            {
+                Area a = *area;
+                a.x += text_xpos;
+                a.y += y_pos+2;
+                a.width -= text_xpos;
+                a.height = font->size;
+                draw_rect_fill(window, COLOR_NEUTRAL_YELLOW, a);
+                color = COLOR_DARK;
+            }
+            else
+                color = COLOR_LIGHT;
             char* line = this->lines[i];
             sprintf(num_string, "%d", this->addresses[i]);
             draw_text(window, font, num_string, this->pos + Point{line_num_xpos, y_pos}, '\0', COLOR_BRIGHT_BLUE); // draw line number
-            draw_text(window, font, line, this->pos + Point{text_xpos, y_pos}, '\n', COLOR_LIGHT); // draw text
+            draw_text(window, font, line, this->pos + Point{text_xpos, y_pos}, '\n', color); // draw text
             y_pos += font->size;
         }
     }

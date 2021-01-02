@@ -18,6 +18,8 @@ struct DebugState
     ByteCode* code;
     DebugInfo* dbginfo;
 
+    bool is_running = false;
+
     void(*report_error_func)( const char* err_str, int addr) = default_report_error;
     void(*print_char_func)(int) = default_print_char;
     void(*print_int_func)(int) = default_print_int;

@@ -108,14 +108,17 @@ int init_gui(Gui* gui)
     gui->selectable_views[3] = &gui->output_view;
 
 
-    ViewSelect* select_right = allocate_assign(gui->alloc, ViewSelect());
+    ViewSelect* select_right_top = allocate_assign(gui->alloc, ViewSelect());
+    ViewSelect* select_right_bottom = allocate_assign(gui->alloc, ViewSelect());
     ViewSelect* select_middle = allocate_assign(gui->alloc, ViewSelect());
     ViewSelect* select_left = allocate_assign(gui->alloc, ViewSelect());
-    create_view_select(select_right, &gui->bytecode_view);
-    create_view_select(select_middle, &gui->variable_view);
+    create_view_select(select_right_top, &gui->variable_view);
+    create_view_select(select_right_bottom, &gui->output_view);
+    create_view_select(select_middle, &gui->bytecode_view);
     create_view_select(select_left);
 
-    VSplit* split3 = allocate_assign(gui->alloc, VSplit((View*)select_middle, (View*)select_right, 0.5f));
+    HSplit* split4 = allocate_assign(gui->alloc, HSplit((View*)select_right_top, (View*)select_right_bottom, 0.5f));
+    VSplit* split3 = allocate_assign(gui->alloc, VSplit((View*)select_middle, (View*)split4, 0.5f));
     VSplit* split2 = allocate_assign(gui->alloc, VSplit((View*)select_left, (View*)split3, 0.333f));
     HSplit* split1 = allocate_assign(gui->alloc, HSplit((View*)&gui->control_bar, (View*)split2, CONTROL_BAR_HEIGHT));
 
@@ -127,6 +130,7 @@ int init_gui(Gui* gui)
 
 
     print_int(&gui->output_view, -1000);
+
 
 
     return 1;
@@ -329,12 +333,36 @@ void open_file()
     }
 
     set_buffer(get_selected_buffer_view(), new_buffer_idx); 
+
+
+    char* filename;
+    int line_num;
+    linenumber_from_instruction_addr(&gui.dbginfo, 2, &filename, &line_num);
+    printf("filename: %s line_num: %d\n", filename, line_num);
 }
 
 void run_program()
 {
     start_debug(&gui.dbgstate, &gui.byte_code, &gui.dbginfo);
     run(&gui.dbgstate);    
+}
+
+void step_program()
+{
+    if(!gui.dbgstate.is_running)
+        start_debug(&gui.dbgstate, &gui.byte_code, &gui.dbginfo);
+
+    step_instruction(&gui.dbgstate);
+}
+
+void stop_program()
+{
+
+}
+
+int get_pc()
+{
+    return gui.dbgstate.pc;
 }
 
 View** get_selectable_views()
