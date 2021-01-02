@@ -81,11 +81,12 @@ int link_debug(std::vector<CompiledObj>& compiled_objects, ByteCode* code, Debug
             dbginfo->line_nums[code_offset+i] = co.program_line_num[i];
 
         // filename_mapping
-        dbginfo->filename_mapping[co_index] = FilenameMapping{code_offset, co.filename};
+        dbginfo->filename_mapping[co_index] = FilenameMapping{code_offset, code_offset+(int)co.code.size()-1, co.filename};
 
         // copy code to the data blob
         for(int i=0; i<co.code.size(); i++)
             data[code_offset + i] = co.code[i];
+
         code_offset += co.code.size();
         
         // and reserve space for the variables

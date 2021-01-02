@@ -1,6 +1,8 @@
 #include "debugger.h"
 #include <stdio.h>
 
+#include <stdio.h>
+
 void default_report_error(const char* err_str, int addr)
 {
     printf("RUNTIME ERROR: %s at %d\n", err_str, addr);
@@ -31,6 +33,8 @@ void start_debug(DebugState* dbgstate, ByteCode* code, DebugInfo* dbginfo)
 
     dbgstate->code = code;
     dbgstate->dbginfo = dbginfo;
+
+    dbgstate->is_running = true;
 }
 
 #define AT(addr) (addr >= code_size) ? heap[addr-code_size] : mem[addr]
