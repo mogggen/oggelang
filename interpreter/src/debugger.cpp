@@ -1,4 +1,5 @@
 #include "debugger.h"
+#include <stdio.h>
 
 void default_report_error(const char* err_str, int addr)
 {
