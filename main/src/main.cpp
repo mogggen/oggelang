@@ -4,7 +4,6 @@
 #include <string.h>
 #include "compiler.h"
 #include "interpreter.h"
-#include "gui_main.h"
 #include "file_util.h"
 #include "debugger.h"
 
@@ -49,14 +48,15 @@ CliParameters parse_cliargs(int argc, char** argv)
 int main(int argc, char** argv)
 {
     CliParameters parameters = parse_cliargs(argc, argv);
-    parameters.print_ast = true;
-    parameters.print_opcodes = true;
-    parameters.run_program = false;
-    parameters.gui = true;
+    //parameters.print_ast = true;
+    //parameters.print_opcodes = true;
+    //parameters.run_program = false;
+    //parameters.gui = true;
 
     if(parameters.gui)
     {
-        gui_main();
+        printf("The gui is currently not available.\n");
+        //gui_main();
     }
     else
     {
@@ -75,7 +75,8 @@ int main(int argc, char** argv)
         DebugInfo info;
         if(!compile_program(&code, parameters.filename, parameters.print_ast, &info))
         {
-            return 0;
+            printf("Compilation Failed\n");
+            return 1;
         }
             
         if(parameters.print_opcodes)
@@ -86,6 +87,8 @@ int main(int argc, char** argv)
 
         DebugState state;
         start_debug(&state, &code, &info);
+
+        printf("Running %s\n", parameters.filename);
         run(&state);
 
         if(parameters.run_program)
@@ -93,7 +96,6 @@ int main(int argc, char** argv)
 
         free(code.data);
     }
-
 
     return 0;
 }

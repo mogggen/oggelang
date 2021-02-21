@@ -13,5 +13,4 @@ set( FREETYPE_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/gui/deps/freetype-2.10.4/include )
 add_subdirectory(compiler)
 add_subdirectory(interpreter)
 
-add_subdirectory(gui)
 add_subdirectory(main)

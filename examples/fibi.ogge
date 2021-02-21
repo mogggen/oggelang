@@ -1,0 +1,13 @@
+var NEW_LINE = 10
+var MAX_NUMBER = 1000
+
+var a = 0
+var b = 1
+var c = 0
+
+print a
+c = a+b
+b = c
+a = b
+
+if a < MAX_NUMBER goto :8
