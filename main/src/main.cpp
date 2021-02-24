@@ -7,12 +7,15 @@
 #include "file_util.h"
 #include "debugger.h"
 
+#include "cli_debugger.h"
+
 struct CliParameters
 {
     bool print_ast = false;
     bool print_opcodes = false;
     bool run_program = true;
     bool gui = false;
+    bool debug = false;
     char* filename = nullptr;
 };
 
@@ -32,9 +35,11 @@ CliParameters parse_cliargs(int argc, char** argv)
                 parameters.run_program = false;
             else if(strcmp(*(argv+i), "-gui") == 0)
                 parameters.gui = true;
+            else if(strcmp(*(argv+i), "-debug") == 0 || strcmp(*(argv+i), "-d") == 0)
+                parameters.gui = true;
             else
             {
-                printf("%s Is invalid flag.\n", *(argv+i));
+                printf("%s Is a invalid flag.\n", *(argv+i));
             }
         }
         else
@@ -88,8 +93,16 @@ int main(int argc, char** argv)
         DebugState state;
         start_debug(&state, &code, &info);
 
-        printf("Running %s\n", parameters.filename);
-        run(&state);
+        if(parameters.debug)
+        {
+            printf("Running %s\n", parameters.filename);
+            run(&state);
+        }
+        else
+        {
+            printf("Running %s\n", parameters.filename);
+            run_cli_debugger(&state);
+        }
 
         if(parameters.run_program)
             run(code);
