@@ -1,7 +1,7 @@
 # Oggelang
 A stupid idea brought to reality.
 
-Things barely work so don't expect to a fun and happy time with this language.
+Things barely work so don't expect a fun and happy time with this language.
 
 ## Building
 Use cmake to generate a build system of your choice and just hope it works.
